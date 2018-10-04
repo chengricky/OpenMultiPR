@@ -69,7 +69,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>Descriptors\GIST\include;$(FFTW_DIR)\include;$(KL1p_DIR)\libs\Armadillo\include;$(KL1p_DIR)\include;$(DBoW3_DIR)\include;$(OpenCV_DIR)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(FFTW_DIR)\lib;$(KL1p_DIR)\bin\win;$(DBoW3_DIR)\lib;$(OpenCV_DIR)\x64\vc15\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>Descriptors\GIST\include;$(FFTW_DIR)\include;$(KL1p_DIR)\libs\Armadillo\include;$(KL1p_DIR)\include;$(DBoW3_DIR)\include;$(OpenCV_DIR)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(FFTW_DIR)\lib;$(KL1p_DIR)\bin\win;$(DBoW3_DIR)\lib;$(OpenCV_DIR)\x64\vc15\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -115,6 +122,39 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Descriptors\BoW\BoW.h" />
+    <ClInclude Include="Descriptors\CS\CompressedSensingExample.h" />
+    <ClInclude Include="Descriptors\CS\CSOperation.h" />
+    <ClInclude Include="Descriptors\database.h" />
+    <ClInclude Include="Descriptors\DescriptorExtraction.h" />
+    <ClInclude Include="Descriptors\DescriptorQuery.h" />
+    <ClInclude Include="Descriptors\GIST\include\gist.h" />
+    <ClInclude Include="Descriptors\LDB\Ldb.h" />
+    <ClInclude Include="FileInterface\FileInterface.h" />
+    <ClInclude Include="FileInterface\GlobalConfig.h" />
+    <ClInclude Include="FileInterface\PicGnssFile.h" />
+    <ClInclude Include="Header.h" />
+    <ClInclude Include="Tools\dirent.h" />
+    <ClInclude Include="Tools\list_dir.h" />
+    <ClInclude Include="Tools\Timer.h" />
+    <ClInclude Include="VisualLocalization.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Descriptors\CS\CompressedSensingExample.cpp" />
+    <ClCompile Include="Descriptors\CS\CSOperation.cpp" />
+    <ClCompile Include="Descriptors\database.cpp" />
+    <ClCompile Include="Descriptors\DescriptorExtraction.cpp" />
+    <ClCompile Include="Descriptors\DescriptorQuery.cpp" />
+    <ClCompile Include="Descriptors\GIST\src\gist.cpp" />
+    <ClCompile Include="Descriptors\GIST\src\libgist.cpp" />
+    <ClCompile Include="Descriptors\GIST\src\standalone_image.cpp" />
+    <ClCompile Include="Descriptors\LDB\Ldb.cpp" />
+    <ClCompile Include="FileInterface\GlobalConfig.cpp" />
+    <ClCompile Include="FileInterface\PicGnssFile.cpp" />
+    <ClCompile Include="KeyPositionMain.cpp" />
+    <ClCompile Include="Tools\list_dir.cpp" />
+    <ClCompile Include="Tools\timer.cpp" />
+    <ClCompile Include="VisualLocalization.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

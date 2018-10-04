@@ -1,0 +1,16 @@
+%YAML:1.0
+---
+
+PathRec: "D:\\PreciseLocalization\\Dataset\\Pano0609\\MAH07812_unwrap_crop_flip\\"
+PathTest: "D:\\PreciseLocalization\\Dataset\\VLdatasetZR300\\route1\\query2\\"
+# read "Image"=0 or "Feature"=1 from files
+FileType: 0
+#ImgType - color(0), depth(1), infrared(2), hybrid-RGBDIR(3), RGBIR(4), BoW-RGB,GIST-RGB,LDB-RGBDIR(5-paperConfig), RGBDIR-SS(6)
+ImgType: 0
+databaseImgSize: [ 1024, 512 ]
+queryImgSize: [ 640, 480 ]
+#descriptor: GIST CS BoW GPS LDB ORB Default--maybe multiple descriptor
+Descriptor: BoW
+Color: 1
+GPS: 0
+
