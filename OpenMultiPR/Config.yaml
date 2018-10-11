@@ -1,16 +1,26 @@
 %YAML:1.0
 ---
 
-PathRec: "D:\\PreciseLocalization\\Dataset\\Pano0609\\MAH07812_unwrap_crop_flip\\"
+PathRec: "D:\\PreciseLocalization\\Dataset\\VLdatasetZR300\\route1\\reference\\"
 PathTest: "D:\\PreciseLocalization\\Dataset\\VLdatasetZR300\\route1\\query2\\"
+#PathRec: "D:\\PreciseLocalization\\openseqslam2-release1\\datasets\\samples\\nordland_trimmed\\summer\\"
+#PathTest: "D:\\PreciseLocalization\\openseqslam2-release1\\datasets\\samples\\nordland_trimmed\\winter\\"
+BoW_CodeBook: "D:\\Dependencies\\DBoW3\\bin\\orbvoc.dbow3"
 # read "Image"=0 or "Feature"=1 from files
 FileType: 0
-#ImgType - color(0), depth(1), infrared(2), hybrid-RGBDIR(3), RGBIR(4), BoW-RGB,GIST-RGB,LDB-RGBDIR(5-paperConfig), RGBDIR-SS(6)
-ImgType: 0
-databaseImgSize: [ 1024, 512 ]
-queryImgSize: [ 640, 480 ]
-#descriptor: GIST CS BoW GPS LDB ORB Default--maybe multiple descriptor
-Descriptor: BoW
+# ImgType - hybrid-RGBDIR(3), RGBIR(4), BoW-RGB,GIST-RGB,LDB-RGBDIR(5-paperConfig), RGBDIR-SS(6)
+ColorImg: 1 # color is essential for place recognition
+DepthImg: 0
+InfraredImg: 0
+databaseImgSize: [ 64, 48 ]
+queryImgSize: [ 64, 48 ]
+# Descriptor: LDB is effective for all images, other descriptor is used for COLOR image only.
+GIST: 1
+CS: 0
+ORB-BoW: 0
+LDB: 1 
+# whether use color image
 Color: 1
-GPS: 0
+# other sensor
+GPS: 1
 

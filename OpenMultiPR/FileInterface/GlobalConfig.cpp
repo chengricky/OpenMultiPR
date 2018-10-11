@@ -20,27 +20,16 @@ bool GlobalConfig::readConfig()
 	}
 	fs["PathRec"] >> pathRec;
 	fs["PathTest"] >> pathTest;
-	int imgtype;
-	fs["ImgType"] >> imgtype;
-	switch (imgtype)
-	{
-	case 0:useColor = true; useDepth = false; useIR = false; useRGBDIR = false; useRGBIR = false; usePaperConfig = false;
-		break;
-	case 1:useColor = false; useDepth = true; useIR = false; useRGBDIR = false; useRGBIR = false; usePaperConfig = false;
-		break;
-	case 2:useColor = false; useDepth = false; useIR = true; useRGBDIR = false; useRGBIR = false; usePaperConfig = false;
-		break;
-	case 3:useColor = false; useDepth = false; useIR = false; useRGBDIR = true; useRGBIR = false; usePaperConfig = false;
-		break;
-	case 4:useColor = false; useDepth = false; useIR = false; useRGBDIR = false; useRGBIR = true; usePaperConfig = false;
-		break;
-	case 5:useColor = false; useDepth = false; useIR = false; useRGBDIR = false; useRGBIR = false; usePaperConfig = true;
-	default:
-		break;
-	}
+	fs["BoW_CodeBook"] >> codeBook;
+	fs["ColorImg"] >> useColor;
+	fs["DepthImg"] >> useDepth;
+	fs["InfraredImg"] >> useIR;
 	fs["queryImgSize"] >> qImgSize;
 	fs["databaseImgSize"] >> dImgSize;
-	fs["Descriptor"] >> descriptor;
+	fs["GIST"] >> useGIST;
+	fs["CS"] >> useCS;
+	fs["ORB-BoW"] >> useBoW;
+	fs["LDB"] >> useLDB;
 	fs["Color"] >> isColor;
 	fs["GPS"] >> withGPS;
 

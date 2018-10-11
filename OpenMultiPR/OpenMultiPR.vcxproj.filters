@@ -51,13 +51,7 @@
     <ClInclude Include="FileInterface\PicGnssFile.h">
       <Filter>FileInterface</Filter>
     </ClInclude>
-    <ClInclude Include="Descriptors\database.h">
-      <Filter>Descriptors</Filter>
-    </ClInclude>
     <ClInclude Include="Descriptors\DescriptorExtraction.h">
-      <Filter>Descriptors</Filter>
-    </ClInclude>
-    <ClInclude Include="Descriptors\DescriptorQuery.h">
       <Filter>Descriptors</Filter>
     </ClInclude>
     <ClInclude Include="Descriptors\CS\CompressedSensingExample.h">
@@ -74,6 +68,15 @@
     </ClInclude>
     <ClInclude Include="Descriptors\BoW\BoW.h">
       <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\DescriptorGroup.h">
+      <Filter>Descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="FileInterface\GroundTruth.h">
+      <Filter>FileInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="SequenceSearch.h">
+      <Filter>Source&amp;Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -95,13 +98,7 @@
     <ClCompile Include="FileInterface\PicGnssFile.cpp">
       <Filter>FileInterface</Filter>
     </ClCompile>
-    <ClCompile Include="Descriptors\database.cpp">
-      <Filter>Descriptors</Filter>
-    </ClCompile>
     <ClCompile Include="Descriptors\DescriptorExtraction.cpp">
-      <Filter>Descriptors</Filter>
-    </ClCompile>
-    <ClCompile Include="Descriptors\DescriptorQuery.cpp">
       <Filter>Descriptors</Filter>
     </ClCompile>
     <ClCompile Include="Descriptors\CS\CompressedSensingExample.cpp">
@@ -121,6 +118,15 @@
     </ClCompile>
     <ClCompile Include="Descriptors\LDB\Ldb.cpp">
       <Filter>Descriptors\LDB</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\DescriptorGroup.cpp">
+      <Filter>Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInterface\GroundTruth.cpp">
+      <Filter>FileInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="SequenceSearch.cpp">
+      <Filter>Source&amp;Header</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

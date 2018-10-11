@@ -3,21 +3,14 @@
 
 using namespace std;
 
-PicGnssFile::PicGnssFile(std::vector<std::string> filepaths, int mode, bool ifLabeled, int sequenceNum, std::string fileKeyWord)
+PicGNSSFile::PicGNSSFile(std::string filepath, int mode, bool ifGNSS, std::string fileKeyWord)
 {
-	init(filepaths, mode, ifLabeled, sequenceNum, fileKeyWord);
+	init(filepath, mode, ifGNSS, fileKeyWord);
 }
 
-void PicGnssFile::init(std::vector<std::string> filepaths, int mode, bool ifLabeled, std::string fileKeyWord)
+void PicGNSSFile::init(std::string filepath, int mode, bool ifGNSS, std::string fileKeyWord)
 {
-	init(filepaths, mode, ifLabeled, 1, fileKeyWord);
-}
-
-void PicGnssFile::init(std::vector<std::string> filepaths, int mode, bool ifLabeled, int sequenceNum, std::string fileKeyWord)
-{
-	this->sequenceNum = sequenceNum;
 	this->mode = mode;
-	this->ifLabelCW = ifLabeled;
 	vector<string> suffix;
 	suffix.push_back("png");
 	suffix.push_back("jpg");
@@ -25,97 +18,62 @@ void PicGnssFile::init(std::vector<std::string> filepaths, int mode, bool ifLabe
 	intptr_t hFile = 0;
 	//文件信息
 	struct _finddata_t fileinfo;
-	for (size_t j = 0; j < filepaths.size(); j++)
-	{
-		string filepath = filepaths[j];
-		for (size_t i = 0; i < suffix.size(); i++)
-		{			
-			string searchPath = filepath + "\\" + fileKeyWord + "." + suffix[i];
-			if ((hFile = _findfirst(searchPath.c_str(), &fileinfo)) != -1)
-			{
-				do
-				{
-					string filename(fileinfo.name);
-					size_t pos = filename.find_first_of('c');
-					string filePrefix = filename.substr(0U, pos);
-					//检查除彩图之外其他图像或文件是否存在
-					bool depth, ground;
-					bool label = ifLabeled;
-					if (mode == RGB)
-					{
-						depth = false;
-						ground = false;
-						findFilesfromColor(filepath, filePrefix, suffix[i], depth, ground, label);
-						if (label == ifLabeled)
-						{
-							colorFiles.push_back(filepath + "\\" + fileinfo.name);
-							if (label)
-							{
-								labelFiles.push_back(filepath + "\\" + fileinfo.name + ".txt");
-							}
-						}
-					}
-					else if (mode == RGBD)
-					{
-						depth = true;
-						ground = false;
-						findFilesfromColor(filepath, filePrefix, suffix[i], depth, ground, label);
-						if (depth && (label == ifLabeled))
-						{
-							colorFiles.push_back(filepath + "\\" + fileinfo.name);
-							depthFiles.push_back(filepath + "\\" + filePrefix + "depth." + suffix[i]);
-							if (label)
-							{
-								labelFiles.push_back(filepath + "\\" + fileinfo.name + ".txt");
-							}
-						}
-					}
-					else if (mode == RGBDIR)
-					{
-						depth = true;
-						ground = true;
-						findFilesfromColor(filepath, filePrefix, suffix[i], depth, ground, label);
-						if (depth && ground && (label == ifLabeled))
-						{
-							colorFiles.push_back(filepath + "\\" + fileinfo.name);
-							depthFiles.push_back(filepath + "\\" + filePrefix + "depth." + suffix[i]);
-							IRFiles.push_back(filepath + "\\" + filePrefix + "rightIR." + suffix[i]);
-							//if (label)
-							//{
-							//	labelFiles.push_back(filepath + "\\" + fileinfo.name + ".txt");
-							//}
-						}
-					}
-
-				} while (_findnext(hFile, &fileinfo) == 0);
-				_findclose(hFile);
-			}
-		}
-		fileVolume = colorFiles.size();
-		if (ifLabeled)
+	for (size_t i = 0; i < suffix.size(); i++)
+	{			
+		string searchPath = filepath + "\\*" + fileKeyWord + "." + suffix[i];
+		if ((hFile = _findfirst(searchPath.c_str(), &fileinfo)) != -1)
 		{
-			//std::cout << colorFiles[i] << std::endl;
-			if (txtGnssLabel.is_open())
+			do
 			{
-				txtGnssLabel.close();
-			}
-			txtGnssLabel.open(filepath + "\\of.txt", ios::in);
-			if (txtGnssLabel.is_open())
-			{
-				readTxtGnssLabel(); // 1 - based frame，读取到frames和vertexes
-			}
+				string filename(fileinfo.name);
+				size_t pos = filename.find_first_of('c');
+				string filePrefix = filename.substr(0U, pos);
+				//检查除彩图之外其他图像或文件是否存在
+				bool depth, ground;
+				if (mode == RGB)
+				{
+					depth = false;
+					ground = false;
+					findFilesfromColor(filepath, filePrefix, suffix[i], depth, ground);
+					colorFiles.push_back(filepath + "\\" + fileinfo.name);
+
+				}
+				else if (mode == RGBD)
+				{
+					depth = true;
+					ground = false;
+					findFilesfromColor(filepath, filePrefix, suffix[i], depth, ground);
+					if (depth)
+					{
+						colorFiles.push_back(filepath + "\\" + fileinfo.name);
+						depthFiles.push_back(filepath + "\\" + filePrefix + "depth." + suffix[i]);
+					}
+				}
+				else if (mode == RGBDIR)
+				{
+					depth = true;
+					ground = true;
+					findFilesfromColor(filepath, filePrefix, suffix[i], depth, ground);
+					if (depth && ground)
+					{
+						colorFiles.push_back(filepath + "\\" + fileinfo.name);
+						depthFiles.push_back(filepath + "\\" + filePrefix + "depth." + suffix[i]);
+						IRFiles.push_back(filepath + "\\" + filePrefix + "rightIR." + suffix[i]);
+					}
+				}
+
+			} while (_findnext(hFile, &fileinfo) == 0);
+			_findclose(hFile);
 		}
 	}
-
+	fileVolume = colorFiles.size();
+	// 根据标志位，读入GNSS坐标信息
+	readTxtGnssLabel(ifGNSS, filepath);
 	filePointer = 0;
-	
-	frames.clear();
-	vertexes.clear();
-
 
 }
 
-void PicGnssFile::findFilesfromColor(string path, string prefix, string suffix, bool& depth, bool&ground, bool& label)
+void PicGNSSFile::findFilesfromColor(string path, string prefix, string suffix, bool& depth, bool&ground)
 {
 	if (depth)
 	{
@@ -134,39 +92,20 @@ void PicGnssFile::findFilesfromColor(string path, string prefix, string suffix, 
 			ground = false;
 		}
 		fileTry.close();
-	}
-	//if (label)
-	//{
-	//	fstream fileTry(path + "\\" + prefix + "color." + suffix + ".txt");
-	//	if (!fileTry)
-	//	{
-	//		label = false;
-	//	}
-	//	fileTry.close();
-	//}
-	
+	}	
 }
 
-bool PicGnssFile::doMain()
+bool PicGNSSFile::doMain()
 {
 	if (filePointer<fileVolume)
 	{		
 		colorImg = cv::imread(colorFiles[filePointer], cv::IMREAD_COLOR);
-		//imshow("inColor", colorImg);
 		if (!latitude.empty() && !longitude.empty())
 		{
 			latitudeValue = latitude[filePointer];
 			longitudeValue = longitude[filePointer];
 		}
-		if (!posLabel.empty())
-		{
-			posLabelValue = posLabel[filePointer];
-		}
-		if (!bestMatch.empty())
-		{
-			bestMatchValue = bestMatch[filePointer];
-		}
-		if (mode == PicGnssFile::RGBDIR || mode == PicGnssFile::RGBD)
+		if (mode == PicGNSSFile::RGBDIR || mode == PicGNSSFile::RGBD)
 		{
 			depthImg = cv::imread(depthFiles[filePointer], cv::IMREAD_GRAYSCALE);
 			imshow("inDepth", depthImg);
@@ -175,7 +114,7 @@ bool PicGnssFile::doMain()
 		{
 			depthImg = cv::Mat();
 		}
-		if (mode == PicGnssFile::RGBDIR)
+		if (mode == PicGNSSFile::RGBDIR)
 		{
 			IRImg = cv::imread(IRFiles[filePointer], cv::IMREAD_GRAYSCALE);
 			imshow("inIR", IRImg);
@@ -194,12 +133,11 @@ bool PicGnssFile::doMain()
 	cv::waitKey(1);
 }
 
-cv::Size PicGnssFile::getImgSize()
+cv::Size PicGNSSFile::getImgSize()
 {
 	cv::Mat tmp = cv::imread(colorFiles[filePointer-1]);
 	return cv::Size((tmp).cols, tmp.rows);
 }
-
 
 std::vector<std::string> splitWithStl(const std::string &str, const std::string &pattern)
 {
@@ -226,8 +164,17 @@ std::vector<std::string> splitWithStl(const std::string &str, const std::string 
 	return resVec;
 }
 
-bool PicGnssFile::readTxtGnssLabel()
+bool PicGNSSFile::readTxtGnssLabel(bool ifGNSS, std::string filepath)
 {
+	if (!ifGNSS)
+	{
+		return false;
+	}
+	std::ifstream txtGnssLabel(filepath + "\\of.txt", ios::in);
+	if (!txtGnssLabel.is_open())
+	{
+		return false;
+	}
 	for (size_t i = 0; i < fileVolume; i++)
 	{
 		string str;
@@ -235,26 +182,7 @@ bool PicGnssFile::readTxtGnssLabel()
 		std::vector<std::string> splitStr = splitWithStl(str, "\t");
 		assert(splitStr.size() >= 3);
 		latitude.push_back(atof(splitStr[1].data())); //string->char*->double
-		longitude.push_back(atof(splitStr[2].data()));
-		if (splitStr.size() == 6)// idx lat lon time satNum label
-		{
-			posLabel.push_back(atoi(splitStr[5].data()));
-		}
-		else if (splitStr.size() == 4)// idx lat lon label
-		{
-			posLabel.push_back(atoi(splitStr[3].data()));
-		}
-		else if (splitStr.size() == 7)
-		{
-			posLabel.push_back(atoi(splitStr[5].data()));
-			bestMatch.push_back(atoi(splitStr[6].data()));
-		}
-		else// idx lat lon 
-		{
-			posLabel.push_back(0);
-		}
-		
+		longitude.push_back(atof(splitStr[2].data()));	
 	}
-
 	return true;
 }

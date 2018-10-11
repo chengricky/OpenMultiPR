@@ -29,17 +29,24 @@ public:
 	cv::Size qImgSize;
 	std::string pathRec;
 	std::string pathTest;
-	std::string descriptor;
+	std::string codeBook;
 
-	bool isColor; //彩色图保持为彩色图(1)或转换为灰度图(0)
+	//彩色图保持为彩色图(1)或转换为灰度图(0)
+	bool isColor; 
 	bool useColor;
 	bool useIR;
 	bool useDepth;
-	bool useRGBDIR;
-	bool useRGBIR;
-	bool usePaperConfig;
+	//bool useRGBDIR;
+	//bool useRGBIR;
+	//bool usePaperConfig;
 	bool withGPS;
 	
+	// Descriptor Type
+	bool useGIST;
+	bool useCS;
+	bool useBoW;
+	bool useLDB;
+
 	// config valid
 	bool valid;
 };

@@ -9,36 +9,36 @@
 class ImgDescriptorExtractor
 {
 protected:
-	int imgIdx;//输入rgb-(ir)-(d)图像组，选择处理的图像类别
+	int imgIdx; //the index of input RGBD-(IR)-(D) image group
+	cv::Mat result;
 public:
 	ImgDescriptorExtractor(int imgIdx) : imgIdx(imgIdx) {};
 	virtual bool extract(std::vector<cv::Mat>  img) = 0;
+	cv::Mat getResult() { return result; };
 };
 
-//class SURFExtractor : public ImgDescriptorExtractor
-//{	
-//	cv::Ptr<cv::FeatureDetector> surfdetector;
-//
-//	cv::Mat result;
-//	vector<cv::KeyPoint> keypoints;
-//public:
-//	SURFExtractor(cv::Mat const&  img);
-//	bool extract();
-//	cv::Mat getResult() { return result; };
-//};
-
-class ORBExtractor : public ImgDescriptorExtractor
+class OCVExtractor : public ImgDescriptorExtractor
 {
-	cv::Ptr<cv::ORB> orb;
-	cv::Mat result;
+protected:
+	cv::Ptr<cv::FeatureDetector> detector; // Feature2D=FeatureDetector
 	std::vector<cv::KeyPoint> keypoints;
+public:
+	OCVExtractor(int imgIdx) : ImgDescriptorExtractor(imgIdx) {};
+	bool extract(std::vector<cv::Mat> img);
+	std::vector<cv::KeyPoint> getKeypoints() { return keypoints; };
+};
 
+class SURFExtractor : public OCVExtractor
+{	
+public:
+	SURFExtractor(int imgIdx);
+};
+
+class ORBExtractor : public OCVExtractor
+{
 public:
 	ORBExtractor(int imgIdx);
-	bool extract(std::vector<cv::Mat>   img);
-	cv::Mat getResult() { return result; };
-	cv::Ptr<cv::ORB> getORB() { return orb; };
-	std::vector<cv::KeyPoint> getKeypoints() { return keypoints; };
+	auto getORB() { return detector; };
 };
 
 class GISTExtractor : public ImgDescriptorExtractor
@@ -46,17 +46,14 @@ class GISTExtractor : public ImgDescriptorExtractor
 	bool isNormalize;
 	// GIST维度计算=sum(orients)*blocks*blocks*nPics
 	cls::GISTParams GIST_PARAMS;
-	std::vector<float> result;
 public:
 	GISTExtractor(int imgIdx, bool useColor, bool isNormalize, cv::Size imgSize ) ;
 	bool extract(std::vector<cv::Mat> todoImages);
-	std::vector<float> getResult() { return result; };
 };
 
 class CSExtractor : public ImgDescriptorExtractor
 {
 	cv::Size imgSize;
-	arma::Col<klab::DoubleReal> result;
 public:
 	CSExtractor(int imgIdx, cv::Size imgSize);
 	bool extract(std::vector<cv::Mat> todoImages);
@@ -65,12 +62,10 @@ public:
 class LDBExtractor : public ImgDescriptorExtractor
 {
 	bool useColor;
-	cv::Mat result;
 	cv::Mat illumination_conversion(cv::Mat image);
 public:
 	LDBExtractor(int imgIdx, bool useColor);
 	bool extract(std::vector<cv::Mat> todoImages);
-	cv::Mat getResult() { return result; };
 };
 
 class Extraction

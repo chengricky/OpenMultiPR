@@ -14,7 +14,7 @@ public:
 	~CSCreater();
 	void printParams();
 	bool initA(int numDic);
-	bool initA(std::vector<std::string> pathsDic, bool uniform = false);	
+	bool initA(std::string pathsDic, bool uniform = false);	
 	arma::Col<klab::DoubleReal> generateCS(cv::Mat singleChannel);
 private:
 	cv::Size imgSize;

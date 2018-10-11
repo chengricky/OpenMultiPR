@@ -1,69 +1,52 @@
 #include "DescriptorExtraction.h"
 #include "CS/CSOperation.h"
 #include "GIST\include\gist.h"
-#include <opencv2\xfeatures2d.hpp>
 
 
-ORBExtractor::ORBExtractor(int imgIdx): ImgDescriptorExtractor(imgIdx)
+ORBExtractor::ORBExtractor(int imgIdx): OCVExtractor(imgIdx)
 {
-	// BoW使用默认配置获得ORB特征
-	orb = cv::ORB::create(500, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20);
+	detector = cv::ORB::create(500, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); 	// BoW使用默认配置获得ORB特征
 }
 
-bool ORBExtractor::extract(std::vector<cv::Mat> todoImages)
+SURFExtractor::SURFExtractor(int imgIdx) : OCVExtractor(imgIdx)
 {
-	std::vector<cv::KeyPoint> keypoint;
+	detector = cv::xfeatures2d::SURF::create();
+}
 
-	orb->detectAndCompute(todoImages[imgIdx], cv::Mat(), keypoints, result);//描述子数目与关键点数相同，现在是每个描述子是32维,256维度的二进制数值
-																	 // add images to the database
+bool OCVExtractor::extract(std::vector<cv::Mat> img)
+{
+	detector->detectAndCompute(img[imgIdx], cv::Mat(), keypoints, result);//描述子数目与关键点数相同，现在是每个描述子是32维,256维度的二进制数值-orb
 	return true;
 }
 
-//SURFExtractor::SURFExtractor(cv::Mat const&  img) : ImgDescriptorExtractor(img)
-//{
-//	surfdetector = cv::xfeatures2d::SURF::create();
-//	cv::Ptr<cv::ImgDescriptorExtractor> surfextractor = cv::xfeatures2d::SURF::create();
-//
-//}
-//
-//bool SURFExtractor::extract()
-//{
-//	surf->detectAndCompute(todoImage, cv::Mat(), keypoints, result);//描述子数目与关键点数相同，现在是每个描述子是32维,256维度的二进制数值
-//																   // add images to the database
-//}
 
-
-GISTExtractor::GISTExtractor(int imgIdx,  bool useColor, bool isNormalize, cv::Size imgSize): ImgDescriptorExtractor(imgIdx),
-	GIST_PARAMS({ useColor, imgSize.width, imgSize.height, 4, 3, { 8, 8, 8 } })
-{
-
-}
+GISTExtractor::GISTExtractor(int imgIdx, bool useColor, bool isNormalize, cv::Size imgSize) : ImgDescriptorExtractor(imgIdx),
+GIST_PARAMS({ useColor, imgSize.width, imgSize.height, 4, 3, { 8, 8, 8 } }) {}
 
 bool GISTExtractor::extract(std::vector<cv::Mat> todoImages)
 {
 	cls::GIST gist_ext(GIST_PARAMS);
-	gist_ext.extract(todoImages[imgIdx], result, isNormalize);//输入彩色图，内部会自动根据DEFAULT_PARAMS需要，转换灰度
-
+	std::vector<float> result_vec;
+	gist_ext.extract(todoImages[imgIdx], result_vec, isNormalize);//输入彩色图，内部会自动根据DEFAULT_PARAMS需要，转换灰度
+	cv::Mat(result_vec).copyTo(result);
 	return true;
 }
 
-CSExtractor::CSExtractor(int imgIdx, cv::Size imgSize) : ImgDescriptorExtractor(imgIdx), imgSize(imgSize)
-{
-
-}
+CSExtractor::CSExtractor(int imgIdx, cv::Size imgSize) : ImgDescriptorExtractor(imgIdx), imgSize(imgSize) {}
 
 bool CSExtractor::extract(std::vector<cv::Mat> todoImages)
 {
+	cv::Mat img;
+	arma::Col<klab::DoubleReal> result_col;
 	if (todoImages[imgIdx].channels() != 1)
-	{
-		std::cout << "Compressive sensing does not support color image!" << std::endl;
-		return false;
-	}
+		cv::cvtColor(todoImages[imgIdx], img, cv::COLOR_BGR2GRAY);
+	else
+		img = todoImages[imgIdx];
 	try
 	{
 		cv::Size imgSizeCS = cv::Size(imgSize.width / 2, imgSize.height / 2);
 		CSCreater csCreater(imgSizeCS, 0.1, true, false);
-		result = csCreater.generateCS(todoImages[imgIdx]);
+		result_col = csCreater.generateCS(img);
 	}
 	catch (klab::KException& e)
 	{
@@ -80,13 +63,14 @@ bool CSExtractor::extract(std::vector<cv::Mat> todoImages)
 		std::cout << "ERROR! Unknown exception !" << std::endl;
 		return false;
 	}
+	for (arma::Col<klab::DoubleReal>::iterator i = result_col.begin(); i != result_col.end(); i++)
+	{
+		result.push_back(*i);
+	}
 	return true;
 }
 
-LDBExtractor::LDBExtractor(int imgIdx, bool useColor) : ImgDescriptorExtractor(imgIdx), useColor(useColor)
-{
-
-}
+LDBExtractor::LDBExtractor(int imgIdx, bool useColor) : ImgDescriptorExtractor(imgIdx), useColor(useColor) {}
 
 bool LDBExtractor::extract(std::vector<cv::Mat> todoImages)
 {

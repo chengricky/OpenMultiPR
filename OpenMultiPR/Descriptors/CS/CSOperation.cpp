@@ -14,8 +14,7 @@ CSCreater::CSCreater(cv::Size imgSize_in, double rho_in, bool randomDic, bool un
 	}
 	else
 	{
-		std::vector<std::string> pathsDic;
-		pathsDic.push_back("D:\\[CWPCL]_above_the_papers\\RS_DATA\\20171130RGBDIRGNSS\\20171124_10-32-33");
+		std::string pathsDic = "D:\\[CWPCL]_above_the_papers\\RS_DATA\\20171130RGBDIRGNSS\\20171124_10-32-33";
 		initA(pathsDic, uniform);
 	}
 }
@@ -33,11 +32,11 @@ bool CSCreater::initA(int numDic)
 		return true;
 }
 
-bool CSCreater::initA(std::vector<std::string> pathsDic, bool uniform)
+bool CSCreater::initA(std::string pathsDic, bool uniform)
 {
 		//pathsDic.push_back("D:\\[CWPCL]_above_the_papers\\RS_DATA\\20171130RGBDIRGNSS\\20171124_10-32-33");
 		// 对象建立后，对图像文件列表和GNSS、是否关键点数据进行赋值
-		PicGnssFile picsDic(pathsDic, PicGnssFile::RGBDIR, true,1,"*");
+		PicGNSSFile picsDic(pathsDic, PicGNSSFile::RGBDIR, true, "*");
 
 		m = picsDic.getFileVolume();//klab::UInt32(alpha*n);	// Number of cs-measurements.字典个数
 

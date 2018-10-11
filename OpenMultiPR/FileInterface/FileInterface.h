@@ -9,7 +9,7 @@ class FileInterface
 public:
 	FileInterface() {}
 	~FileInterface() {}
-	virtual void init(std::vector<std::string> folderPath, int mode, bool ifLabeledCW) = 0;
+	virtual void init(std::string folderPath, int mode, bool ifLabeled) = 0;
 
 	virtual bool doMain() = 0;
 	virtual cv::Size getImgSize() = 0;
