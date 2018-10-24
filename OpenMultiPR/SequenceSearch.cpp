@@ -6,23 +6,23 @@ void SequenceSearch::trajectorySearch()
 	//vsteps
 }
 
-void SequenceSearch::coneSearch(int numSearch, float vmin, float vmax, bool isMax)//必须为奇数
+void SequenceSearch::coneSearch()//必须为奇数
 {
 	if (globalResult.empty())
 	{
-		globalSearch(isMax);
+		scoreMat = cv::Mat(matSize.height,matSize.width, CV_32FC1, 0.0f);
+		return;
 	}
-	scoreMat.create(distanceMat.size(), distanceMat.type());
-	for (size_t i = 0; i < distanceMat.rows; i++)//query
+	scoreMat.create(matSize, CV_32FC1);
+	for (size_t i = 0; i < matSize.height; i++)//query
 	{
-		float* pD = distanceMat.ptr<float>(i);
 		float* pS = scoreMat.ptr<float>(i);
-		for (size_t j = 0; j < distanceMat.cols; j++)//database
+		for (size_t j = 0; j < matSize.width; j++)//database
 		{
 			int count = 0;
 			int min_y = std::max(0, (int)i - (numSearch - 1) / 2);
-			int max_y = std::min((int)i + (numSearch - 1) / 2, distanceMat.cols - 1);
-			for (size_t k = min_y; k <= max_y; k++)//query within cone
+			int max_y = std::min((int)i + (numSearch - 1) / 2, matSize.height - 1);
+			for (size_t k = min_y; k <= max_y; k++)//query within coneopen
 			{
 				int min_x, max_x;
 				if (k<i)
@@ -32,18 +32,17 @@ void SequenceSearch::coneSearch(int numSearch, float vmin, float vmax, bool isMa
 				}
 				else
 				{
-					max_x = std::min(int((k - i)*vmax + j), distanceMat.cols-1);
+					max_x = std::min(int((k - i)*vmax + j), matSize.width -1);
 					min_x = (k - i)*vmin + j;
 				}
 				if (globalResult[k]>=min_x && globalResult[k]<=max_x)
 				{
 					count++;
 				}
-
 			}
 			if (count)
 			{
-				pS[j] = (float)count / numSearch;
+				pS[j] = float(count) / float(max_y- min_y+1);
 			}
 			else
 			{
@@ -53,21 +52,3 @@ void SequenceSearch::coneSearch(int numSearch, float vmin, float vmax, bool isMa
 	}
 }
 
-void SequenceSearch::globalSearch(bool isMax)
-{
-	for (size_t i = 0; i < distanceMat.rows; i++)//query
-	{
-		double minVal, maxVal;
-		int minPos, maxPos;
-		cv::minMaxIdx(distanceMat.row(i), &minVal, &maxVal, &minPos, &maxPos);
-		if (isMax)
-		{
-			globalResult.push_back(maxPos);
-		}
-		else
-		{
-			globalResult.push_back(minPos);
-		}
-		
-	}
-}

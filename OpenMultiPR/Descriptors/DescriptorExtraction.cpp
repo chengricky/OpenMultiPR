@@ -86,7 +86,6 @@ bool LDBExtractor::extract(std::vector<cv::Mat> todoImages)
 	// attention: color image are not supported in the ldb extraction 内部会转换为灰度图
 	cv::Mat matrix;
 	if (todoImages[imgIdx].channels() != 1 && useColor)
-		//cvtColor(illumination_conversion(todoImage), matrix, cv::COLOR_BGR2GRAY);
 		matrix = illumination_conversion(todoImages[imgIdx]);
 	else
 		matrix = todoImages[imgIdx];

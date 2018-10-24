@@ -26,7 +26,7 @@ static std::vector<std::string> splitWithStl(const std::string &str, const std::
 	return resVec;
 }
 
-GroundTruth::GroundTruth(std::string filepathGT, std::string filepathLabel)
+void GroundTruth::init(std::string filepathGT, std::string filepathLabel)
 {
 	std::ifstream fileGT(filepathGT, std::ios::in);
 	if (fileGT.is_open())
@@ -37,7 +37,7 @@ GroundTruth::GroundTruth(std::string filepathGT, std::string filepathLabel)
 			std::vector<std::string> splitStr = splitWithStl(line, "\t");
 			assert(splitStr.size() >= 7);
 			groundTruth.push_back(atoi(splitStr[6].data())); //string->char*->int
-		}		
+		}
 	}
 	fileGT.close();
 	std::ifstream fileLabel(filepathLabel, std::ios::in);
@@ -54,11 +54,21 @@ GroundTruth::GroundTruth(std::string filepathGT, std::string filepathLabel)
 	fileLabel.close();
 }
 
+GroundTruth::GroundTruth(std::string filepathGT, std::string filepathLabel)
+{
+	init(filepathGT, filepathLabel);
+}
+
 void GroundTruth::generateGroundTruth(int tolerence)
 {
-	std::vector<int> gt_element;
 	for (auto elem : groundTruth)//1-based
 	{
+		std::vector<int> gt_element;
+		if (elem==-1)
+		{
+			gt.push_back(gt_element);
+			continue;
+		}		
 		int min = std::max(1, elem - tolerence);
 		int max = std::min((int)keyLabel.size(), elem + tolerence);
 		for (size_t i = min; i <= max; i++)
@@ -86,6 +96,5 @@ void GroundTruth::generateGroundTruth(int tolerence)
 			}
 		}
 		gt.push_back(gt_element);
-		gt_element.clear();
 	}
 }

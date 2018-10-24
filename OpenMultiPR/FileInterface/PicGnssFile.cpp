@@ -100,6 +100,7 @@ bool PicGNSSFile::doMain()
 	if (filePointer<fileVolume)
 	{		
 		colorImg = cv::imread(colorFiles[filePointer], cv::IMREAD_COLOR);
+		imshow("inColor", colorImg);
 		if (!latitude.empty() && !longitude.empty())
 		{
 			latitudeValue = latitude[filePointer];
@@ -124,13 +125,14 @@ bool PicGNSSFile::doMain()
 			IRImg = cv::Mat();
 		}
 		filePointer++;
+		cv::waitKey(1);
 		return true;
 	}
 	else
 	{
 		return false;
 	}
-	cv::waitKey(1);
+	
 }
 
 cv::Size PicGNSSFile::getImgSize()

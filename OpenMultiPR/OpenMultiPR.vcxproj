@@ -133,9 +133,12 @@
     <ClInclude Include="FileInterface\GlobalConfig.h" />
     <ClInclude Include="FileInterface\GroundTruth.h" />
     <ClInclude Include="FileInterface\PicGnssFile.h" />
+    <ClInclude Include="genetic.hpp" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="ParameterTuning.h" />
     <ClInclude Include="SequenceSearch.h" />
     <ClInclude Include="Tools\dirent.h" />
+    <ClInclude Include="Tools\GNSSDistance.h" />
     <ClInclude Include="Tools\list_dir.h" />
     <ClInclude Include="Tools\Timer.h" />
     <ClInclude Include="VisualLocalization.h" />
@@ -153,7 +156,9 @@
     <ClCompile Include="FileInterface\GroundTruth.cpp" />
     <ClCompile Include="FileInterface\PicGnssFile.cpp" />
     <ClCompile Include="KeyPositionMain.cpp" />
+    <ClCompile Include="ParameterTuning.cpp" />
     <ClCompile Include="SequenceSearch.cpp" />
+    <ClCompile Include="Tools\GNSSDistance.cpp" />
     <ClCompile Include="Tools\list_dir.cpp" />
     <ClCompile Include="Tools\timer.cpp" />
     <ClCompile Include="VisualLocalization.cpp" />

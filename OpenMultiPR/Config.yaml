@@ -1,23 +1,25 @@
 %YAML:1.0
 ---
 
-PathRec: "D:\\PreciseLocalization\\Dataset\\VLdatasetZR300\\route1\\reference\\"
-PathTest: "D:\\PreciseLocalization\\Dataset\\VLdatasetZR300\\route1\\query2\\"
-#PathRec: "D:\\PreciseLocalization\\openseqslam2-release1\\datasets\\samples\\nordland_trimmed\\summer\\"
-#PathTest: "D:\\PreciseLocalization\\openseqslam2-release1\\datasets\\samples\\nordland_trimmed\\winter\\"
+PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Lib\\reference\\"
+PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Lib\\query\\"
+#PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Gate\\reference\\"
+#PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Gate\\query\\"
+#PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\reference\\"
+#PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\query\\"
 BoW_CodeBook: "D:\\Dependencies\\DBoW3\\bin\\orbvoc.dbow3"
 # read "Image"=0 or "Feature"=1 from files
 FileType: 0
 # ImgType - hybrid-RGBDIR(3), RGBIR(4), BoW-RGB,GIST-RGB,LDB-RGBDIR(5-paperConfig), RGBDIR-SS(6)
 ColorImg: 1 # color is essential for place recognition
-DepthImg: 0
-InfraredImg: 0
-databaseImgSize: [ 64, 48 ]
-queryImgSize: [ 64, 48 ]
+DepthImg: 1
+InfraredImg: 1
+databaseImgSize: [ 640, 480 ]
+queryImgSize: [ 640, 480 ]
 # Descriptor: LDB is effective for all images, other descriptor is used for COLOR image only.
 GIST: 1
 CS: 0
-ORB-BoW: 0
+ORB-BoW: 1
 LDB: 1 
 # whether use color image
 Color: 1

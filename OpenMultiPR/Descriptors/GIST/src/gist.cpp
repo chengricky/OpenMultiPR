@@ -82,12 +82,14 @@ void GIST::extract(const Mat& _src, vector<float>& result, bool isNormalize) con
     // Compute gist descriptor
     cropped.convertTo(cropped, CV_32F);
     DescPtr desc(nullptr, &free);
+	
 
     if (params.use_color) {
         assert(cropped.channels() == 3);
         desc.reset(color_gist_scaletab(GISTImage(cropped),
                    params.blocks, params.scale, params.orients.data(), isNormalize));
     } else {
+		//desc_size = 1;
         //cvtColor(cropped, cropped, CV_BGR2GRAY);
         desc.reset(bw_gist_scaletab(GISTImage(cropped),
                    params.blocks, params.scale, params.orients.data(), isNormalize));

@@ -78,6 +78,15 @@
     <ClInclude Include="SequenceSearch.h">
       <Filter>Source&amp;Header</Filter>
     </ClInclude>
+    <ClInclude Include="Tools\GNSSDistance.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="genetic.hpp">
+      <Filter>Source&amp;Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ParameterTuning.h">
+      <Filter>Source&amp;Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="KeyPositionMain.cpp">
@@ -126,6 +135,12 @@
       <Filter>FileInterface</Filter>
     </ClCompile>
     <ClCompile Include="SequenceSearch.cpp">
+      <Filter>Source&amp;Header</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools\GNSSDistance.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="ParameterTuning.cpp">
       <Filter>Source&amp;Header</Filter>
     </ClCompile>
   </ItemGroup>

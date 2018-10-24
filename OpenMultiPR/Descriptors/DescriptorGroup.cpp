@@ -2,6 +2,7 @@
 #include "..\tools\Timer.h"
 #include "..\tools\list_dir.h"
 #include "direct.h"
+#include "../Tools/GNSSDistance.h"
 
 Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 {
@@ -30,21 +31,37 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 	if (config.useBoW == true)
 	{
 		extraction.add(new  ORBExtractor(0));
-	}
-	if (config.useGIST == true)
-	{
-		extraction.add(new GISTExtractor(0, true, true, config.dImgSize));
-	}
-	if (config.useLDB == true)
-	{
-		extraction.add(new LDBExtractor(0, true));
 		if (config.useDepth)
 		{
-			extraction.add(new LDBExtractor(1, true));
+			extraction.add(new ORBExtractor(1));
 		}
 		if (config.useIR)
 		{
-			extraction.add(new LDBExtractor(2, true));
+			extraction.add(new ORBExtractor(2));
+		}
+	}
+	if (config.useGIST == true)
+	{
+		extraction.add(new GISTExtractor(0, config.isColor, true, config.dImgSize));
+		if (config.useDepth)
+		{
+			extraction.add(new GISTExtractor(1, false, true, config.dImgSize));
+		}
+		if (config.useIR)
+		{
+			extraction.add(new GISTExtractor(2, false, true, config.dImgSize));
+		}
+	}
+	if (config.useLDB == true)
+	{
+		extraction.add(new LDBExtractor(0, config.isColor));
+		if (config.useDepth)
+		{
+			extraction.add(new LDBExtractor(1, config.isColor));
+		}
+		if (config.useIR)
+		{
+			extraction.add(new LDBExtractor(2, config.isColor));
 		}
 	}
 	if (config.useCS == true)
@@ -55,9 +72,10 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 	while (picFiles.doMain())
 	{
 		/*GPS*/
+		// ddmm.mmmm --> dd.dddddd (style conversion)
 		cv::Mat GPS_row(1, 2, CV_32FC1);
-		GPS_row.at<float>(0, 0) = picFiles.longitudeValue;
-		GPS_row.at<float>(0, 1) = picFiles.latitudeValue;
+		GPS_row.at<float>(0, 0) = ddmm2dd(picFiles.longitudeValue);
+		GPS_row.at<float>(0, 1) = ddmm2dd(picFiles.latitudeValue);
 		GPS.push_back(GPS_row);
 
 		// Mat order color-depth-IR
@@ -75,6 +93,7 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 		extraction.run(todoImages);
 		std::vector<cv::Mat> xLDBChannel;
 		std::vector<cv::Mat> xGISTChannel;
+		std::vector<cv::Mat> xORBChannel;
 		for (size_t i = 0; i < extraction.getSize(); i++)
 		{
 			ImgDescriptorExtractor* pDescriptor = extraction.getResult(i);
@@ -91,7 +110,7 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 			else if (typeid(*pDescriptor) == typeid(ORBExtractor))
 			{
 				ORBExtractor* pORB = static_cast<ORBExtractor*>(pDescriptor);
-				(pORB->getResult()).copyTo(xORB);
+				xORBChannel.push_back(pORB->getResult());
 			}
 			else if (typeid(*pDescriptor) == typeid(CSExtractor))
 			{
@@ -99,14 +118,14 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 				(pCS->getResult()).copyTo(xCS);
 			}
 		}
-		if (!xLDBChannel.empty())
-		{
-			cv::merge(xLDBChannel, xLDB);
-		}
-		if (!xGISTChannel.empty())
-		{
-			cv::merge(xGISTChannel, xGIST);
-		}
+		//if (!xLDBChannel.empty())
+		//{
+		//	cv::merge(xLDBChannel, xLDB);
+		//}
+		//if (!xGISTChannel.empty())
+		//{
+		//	cv::merge(xGISTChannel, xGIST);
+		//}
 
 		timer.stop();
 		std::cout << "Time consumed: ";
@@ -115,12 +134,20 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 		/*CS*/
 		CS.push_back(xCS);
 		/*GIST*/
-		GIST.push_back(xGIST);
+		//GIST.push_back(xGIST);
+		GIST_RGB.push_back(xGISTChannel[0]);
+		GIST_D.push_back(xGISTChannel[1]);
+		GIST_IR.push_back(xGISTChannel[2]);
 		/*LDB*/
-		LDB.push_back(xLDB);
+		//LDB.push_back(xLDB);
+		LDB_RGB.push_back(xLDBChannel[0]);
+		LDB_D.push_back(xLDBChannel[1]);
+		LDB_IR.push_back(xLDBChannel[2]);
 		/*ORB*/
-		ORB.push_back(xORB);
-
+		//ORB.push_back(xORB);
+		ORB_RGB.push_back(xORBChannel[0]);
+		ORB_D.push_back(xORBChannel[1]);
+		ORB_IR.push_back(xORBChannel[2]);
 		//cv::waitKey(1);
 	}
 }

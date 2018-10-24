@@ -7,16 +7,7 @@
 #include <cmath>
 #include <opencv2/opencv.hpp>
 
-struct Params
-{
-	int kLDB;
-	int kGIST;
-	int kBoW;
-	double r;
-	double numKeyRatio;
-	double numKeyTh;
-	double PandR[4];
-};
+
 
 GlobalConfig GlobalConfig::config("Config.yaml");
 
@@ -25,9 +16,9 @@ int main()
 	static GlobalConfig& config = GlobalConfig::instance();
 	VisualLocalization vl(config);
 
-	vl.getDistanceMatrix();
-	//vl.getEnhancedDistanceMatrix(3);
-	vl.showDistanceMatrix();
+
+	vl.getBestMatch();
+	//vl.showDistanceMatrix();
 
 
 	cv::waitKey(0);

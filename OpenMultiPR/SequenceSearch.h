@@ -3,16 +3,24 @@
 
 class SequenceSearch
 {
-	cv::Mat distanceMat;
+	std::vector<int> globalResult;//0-based
+	cv::Size matSize;
+	int numSearch;
+	float vmin, vmax;
+
 public:
-	SequenceSearch(cv::Mat distanceMat) : distanceMat(distanceMat){};
+	SequenceSearch() {};
+	void init(std::vector<int> globalResult, cv::Size matSize, int numSearch, float vmin, float vmax)
+	{
+		this->globalResult = (globalResult);
+		this->matSize = matSize;
+		this->numSearch = numSearch;
+		this->vmax = vmax;
+		this->vmin = vmin;
+	};
 	~SequenceSearch() {};
 
 	void trajectorySearch();
-	void coneSearch(int numSearch, float vmin, float vmax, bool isMax);
-
-	void globalSearch(bool isMax);
-
-	cv::Mat scoreMat;
-	std::vector<int> globalResult;//0-based
+	void coneSearch();
+	cv::Mat scoreMat;	
 };

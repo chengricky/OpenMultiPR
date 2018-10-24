@@ -2,6 +2,7 @@
 
 #include "Descriptors\descriptorgroup.h"
 #include "Descriptors/BoW/BoW.h"
+#include "FileInterface/GroundTruth.h"
 
 class VisualLocalization
 {
@@ -9,10 +10,12 @@ public:
 	VisualLocalization(GlobalConfig& config);
 	virtual ~VisualLocalization();
 
+	void getBestMatch();
 	bool showDistanceMatrix();
-	bool getDistanceMatrix();
+	bool getDistanceMatrix(int channelIdx);
+	bool getDistanceMatrix(float GNSS=30);
 	bool getEnhancedDistanceMatrix(int winSize);
-
+	bool getGlobalSearch(int channelIdx);
 	
 private:
 	//bool useDepth, useIR, useRGBDIR, useRGBIR; //应该是不用的，已经在DesciptorGroup中读取过
@@ -35,11 +38,11 @@ private:
 
 
 	// get a distance matrix, which is as follows
-	cv::Mat GISTDistance;
-	cv::Mat LDBDistance;
+	cv::Mat GISTDistance_RGB, GISTDistance_D, GISTDistance_IR;
+	cv::Mat LDBDistance_RGB, LDBDistance_D, LDBDistance_IR;
 	cv::Mat GPSDistance;
+	cv::Mat GPSMask, GPSMask_uchar;
 	cv::Mat CSDistance;
-	cv::Mat BoWDistance;
 	std::string codeBook;
 	//   ----> database
 	//  |
@@ -48,7 +51,13 @@ private:
 	//  query images
 	cv::Mat enhanceMatrix(const cv::Mat& distanceMat, int winSize);
 
+	// 最佳匹配结果
+	std::vector<int> BoWGlobalBest_RGB, BoWGlobalBest_D, BoWGlobalBest_IR;
+	std::vector<int> GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR;
+	std::vector<int> LDBGlobalBest_RGB, LDBGlobalBest_D, LDBGlobalBest_IR;
 
+
+	GroundTruth ground;
 };
 
 // 对pair进行排序的比较函数
