@@ -2,6 +2,72 @@
 #include "CS/CSOperation.h"
 #include "GIST\include\gist.h"
 
+GoogLeNetExtractor::GoogLeNetExtractor(int imgIdx) : ImgDescriptorExtractor(imgIdx)
+{
+	//net = cv::dnn::readNetFromCaffe("bvlc_googlenet\\deploy.prototxt", "bvlc_googlenet\\bvlc_googlenet.caffemodel");
+	net = cv::dnn::readNetFromCaffe("places_googlenet\\deploy_googlenet_places365.prototxt", "places_googlenet\\googlenet_places365.caffemodel");
+	
+	if (net.empty())
+	{
+		std::cout << "Read file ERROR!" << std::endl;
+	}
+	std::ifstream fIdx("compressIdx.txt", std::ios::in);
+	std::string str;	
+	while (std::getline(fIdx, str))
+	{
+		//std::cout << str<<std::endl;
+		idxes.push_back(atoi(str.data()));
+	}
+	fIdx.close();
+}
+
+static cv::Mat featureReshape(std::vector<cv::Mat>& layer1_Mat)
+{
+	cv::Mat layer1_vec;
+	for (auto mat : layer1_Mat)
+	{
+		if (layer1_vec.empty())
+		{
+			//std::cout << mat.size[0] << std::endl;
+			//std::cout << mat.size[1] << std::endl;
+			//std::cout << mat.size[2] << std::endl;
+			//std::cout << mat.size[3] << std::endl;
+			layer1_vec = mat.reshape(1, 1);
+		}
+		else
+		{
+			//std::cout << mat.size[0] << std::endl;
+			//std::cout << mat.size[1] << std::endl;
+			//std::cout << mat.size[2] << std::endl;
+			//std::cout << mat.size[3] << std::endl;
+			cv::Mat m = mat.reshape(1, 1);
+			//std::cout<<m.type();//类型是float
+			cv::hconcat(layer1_vec, m, layer1_vec);
+		}
+	}
+	return layer1_vec;
+}
+
+bool GoogLeNetExtractor::extract(std::vector<cv::Mat> img)
+{
+	result = cv::Mat();
+	cv::Mat imgResize;
+	cv::resize(img[imgIdx], imgResize, cv::Size(224, 224));
+	net.setInput(cv::dnn::blobFromImage(imgResize, 1, cv::Size(224, 224), cv::Scalar(104, 117, 123)), "data");
+
+	std::vector<std::string> layers;
+	layers.push_back("inception_3a/3x3_reduce");
+	layers.push_back("inception_3a/3x3");
+	std::vector<cv::Mat> features;
+	net.forward(features, layers);
+
+	auto feature_GoogLeNet = featureReshape(features);
+	for (auto id : idxes)
+	{
+		result.push_back(feature_GoogLeNet.at<float>(0, id));
+	}
+	result = result.reshape(1, 1);
+}
 
 ORBExtractor::ORBExtractor(int imgIdx): OCVExtractor(imgIdx)
 {
@@ -27,8 +93,8 @@ bool GISTExtractor::extract(std::vector<cv::Mat> todoImages)
 {
 	cls::GIST gist_ext(GIST_PARAMS);
 	std::vector<float> result_vec;
-	gist_ext.extract(todoImages[imgIdx], result_vec, isNormalize);//输入彩色图，内部会自动根据DEFAULT_PARAMS需要，转换灰度
-	cv::Mat(result_vec).copyTo(result);
+	gist_ext.extract(todoImages[imgIdx], result_vec, isNormalize);//输入彩色图，内部会自动根据DEFAULT_PARAMS需要，转换灰度	
+	result = cv::Mat(result_vec).reshape(1, 1);
 	return true;
 }
 

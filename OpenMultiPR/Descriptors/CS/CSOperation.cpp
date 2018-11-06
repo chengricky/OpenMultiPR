@@ -44,9 +44,9 @@ bool CSCreater::initA(std::string pathsDic, bool uniform)
 		while (picsDic.doMain())
 		{
 			cv::Mat gray;
-			cvtColor(picsDic.colorImg, gray, CV_BGR2GRAY);
+			cvtColor(picsDic.colorImg, gray, cv::COLOR_BGR2GRAY);
 			//gray = picsDic.IRImg;
-			resize(gray, gray, imgSize, 0, 0, CV_INTER_AREA);
+			resize(gray, gray, imgSize, 0, 0, cv::INTER_AREA);
 			cv::Mat grayCol = gray.reshape(0, n);
 			cv::imshow("gray", gray);
 			cv::waitKey(1);
@@ -84,7 +84,7 @@ void CSCreater::printParams()
 arma::Col<klab::DoubleReal> CSCreater::generateCS(cv::Mat singleChannel)
 {
 	cv::Mat gray;
-	cv::resize(singleChannel, gray, imgSize, 0, 0, CV_INTER_AREA);
+	cv::resize(singleChannel, gray, imgSize, 0, 0, cv::INTER_AREA);
 	cv::Mat  grayCol = gray.reshape(0, imgSize.area());
 	//cv::imshow("gray", gray);
 	//cv::waitKey(1);

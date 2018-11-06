@@ -68,6 +68,15 @@ public:
 	bool extract(std::vector<cv::Mat> todoImages);
 };
 
+class GoogLeNetExtractor : public ImgDescriptorExtractor
+{
+	cv::dnn::Net net;
+	std::vector<int> idxes;
+public:
+	GoogLeNetExtractor(int imgIdx);
+	bool extract(std::vector<cv::Mat> todoImages);
+};
+
 class Extraction
 {
 	std::vector<ImgDescriptorExtractor*> extractions;

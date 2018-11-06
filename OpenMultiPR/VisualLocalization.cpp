@@ -23,7 +23,7 @@ VisualLocalization::VisualLocalization(GlobalConfig& config)
 	this->codeBook = config.codeBook;
 	cv::destroyAllWindows();
 	ground.init(config.pathTest + "of.txt", config.pathRec + "of.txt");
-	ground.generateGroundTruth(7);
+	ground.generateGroundTruth(5);
 };
 
 VisualLocalization::~VisualLocalization()
@@ -85,6 +85,7 @@ bool VisualLocalization::getDistanceMatrix(int channelIdx)
 			for (size_t j = 0; j < matCol; j++)
 				LDBDistance->at<float>(i, j) = hamming_matching(LDBQuery.row(i), LDBRef.row(j));
 	}
+
 	return true;
 }
 
@@ -106,13 +107,27 @@ bool VisualLocalization::getDistanceMatrix(float gnssTh)
 			for (size_t j = 0; j < matCol; j++)
 				CSDistance.at<float>(i, j) = cv::norm(CSQuery.row(i), CSRef.row(j), cv::NORM_L2);
 	}
+	// GoogLeNet
+	auto GGQuery = descriptorquery->GG;
+	auto GGRef = descriptorbase->GG;
+	if (GGQuery.empty()||GGRef.empty())
+	{
+		GGDistance = cv::Mat();
+	}
+	else
+	{
+		GGDistance = cv::Mat(matRow, matCol, CV_32FC1);
+		for (size_t i = 0; i < matRow; i++)
+			for (size_t j = 0; j < matCol; j++)
+				GGDistance.at<float>(i, j) = cv::norm(GGQuery.row(i), GGRef.row(j), cv::NORM_L2);
+	}
 	// GPS
 	auto GPSQuery = descriptorquery->GPS;
 	auto GPSRef = descriptorbase->GPS;
 	if (GPSQuery.empty() || GPSRef.empty())
 	{
 		GPSDistance = cv::Mat();
-		GPSMask = cv::Mat();
+		GPSMask_uchar = cv::Mat();
 	}
 	else
 	{
@@ -120,8 +135,11 @@ bool VisualLocalization::getDistanceMatrix(float gnssTh)
 		for (size_t i = 0; i < matRow; i++)
 			for (size_t j = 0; j < matCol; j++)
 				GPSDistance.at<float>(i, j) = GNSSdistance(GPSQuery.at<float>(i,1), GPSQuery.at<float>(i, 0), GPSRef.at<float>(j, 1), GPSRef.at<float>(j, 0));
-		cv::threshold(GPSDistance, GPSMask, gnssTh, FLT_MAX, cv::THRESH_BINARY_INV);
-		GPSMask.convertTo(GPSMask_uchar, CV_8UC1);
+		cv::Mat GPSuchar;
+		GPSDistance.convertTo(GPSuchar, CV_8U);
+		cv::threshold(GPSuchar, GPSMask_uchar, gnssTh, 255, cv::THRESH_BINARY);
+		//cv::threshold(GPSDistance, GPSMask, gnssTh, FLT_MAX, cv::THRESH_BINARY_INV);
+		//GPSMask.convertTo(GPSMask_uchar, CV_8U);
 	}
 	
 	return true;
@@ -164,7 +182,7 @@ bool VisualLocalization::getGlobalSearch(int channelIdx)
 		for (size_t i = 0; i < ORBQuery.size(); i++)
 		{
 			
-			if (GPSMask.empty())
+			if (GPSMask_uchar.empty())
 			{
 				ORBdb.query(ORBQuery[i], ret);
 				BoWGlobalBest->push_back(ret[0].Id);
@@ -174,7 +192,7 @@ bool VisualLocalization::getGlobalSearch(int channelIdx)
 				ORBdb.query(ORBQuery[i], ret, -1);//ret 是0-based
 				for (auto r : ret)
 				{
-					if (GPSMask.at<uchar>(i, r.Id))
+					if (!GPSMask_uchar.at<uchar>(i, r.Id))
 					{
 						BoWGlobalBest->push_back(r.Id);
 						break;
@@ -195,10 +213,10 @@ bool VisualLocalization::getGlobalSearch(int channelIdx)
 	default:
 		break;
 	}
-	LDBdistanceMat = LDBdistanceMat & GPSMask;
-	GISTdistanceMat = GISTdistanceMat & GPSMask;
-	LDBdistanceMat.setTo(FLT_MAX, ~GPSMask_uchar);
-	GISTdistanceMat.setTo(FLT_MAX, ~GPSMask_uchar);
+	//LDBdistanceMat = LDBdistanceMat & GPSMask;
+	//GISTdistanceMat = GISTdistanceMat & GPSMask;
+	LDBdistanceMat.setTo(FLT_MAX, GPSMask_uchar);
+	GISTdistanceMat.setTo(FLT_MAX, GPSMask_uchar);
 
 	for (size_t i = 0; i < LDBdistanceMat.rows; i++)//query
 	{
@@ -215,6 +233,39 @@ bool VisualLocalization::getGlobalSearch(int channelIdx)
 	return true;
 }
 
+bool VisualLocalization::getGlobalSearch()//GPS global best
+{
+	/// only GPS localization
+	//cv::Mat GPSdistanceMat = GPSDistance & GPSMask;
+	//GPSdistanceMat.setTo(FLT_MAX, ~GPSMask_uchar);
+	//for (size_t i = 0; i < GPSdistanceMat.rows; i++)//query
+	//{
+	//	//When minIdx is not NULL, it must have at least 2 elements (as well as maxIdx), even if src is a single-row or single-column matrix.
+	//	//In OpenCV (following MATLAB) each array has at least 2 dimensions, i.e. single-column matrix is Mx1 matrix (and therefore minIdx/maxIdx will be (i1,0)/(i2,0)) 
+	//	//and single-row matrix is 1xN matrix (and therefore minIdx/maxIdx will be (0,j1)/(0,j2)).
+	//	int* minPos = new int[2];
+	//	cv::minMaxIdx(GPSdistanceMat.row(i), nullptr, nullptr, minPos, nullptr);	//可否改成top-k		?
+	//	BoWGlobalBest_RGB.push_back(minPos[1]);
+	//	delete minPos;
+	//}
+
+	/// GoogLeNet 
+	//cv::Mat GGdistanceMat = GGDistance & GPSMask;
+	cv::Mat GGdistanceMat = GGDistance;
+	GGdistanceMat.setTo(FLT_MAX, GPSMask_uchar);
+
+	for (size_t i = 0; i < GGdistanceMat.rows; i++)//query
+	{
+		//When minIdx is not NULL, it must have at least 2 elements (as well as maxIdx), even if src is a single-row or single-column matrix.
+		//In OpenCV (following MATLAB) each array has at least 2 dimensions, i.e. single-column matrix is Mx1 matrix (and therefore minIdx/maxIdx will be (i1,0)/(i2,0)) 
+		//and single-row matrix is 1xN matrix (and therefore minIdx/maxIdx will be (0,j1)/(0,j2)).
+		int* minPos = new int[2];
+		cv::minMaxIdx(GGdistanceMat.row(i), nullptr, nullptr, minPos, nullptr);	//可否改成top-k		?
+		GGglobalResult.push_back(minPos[1]);
+		delete minPos;
+	}
+	return true;
+}
 
 void VisualLocalization::getBestMatch()
 {
@@ -226,35 +277,56 @@ void VisualLocalization::getBestMatch()
 		getDistanceMatrix((int)i);
 		getGlobalSearch(i);
 	}
-	
+	getGlobalSearch();
+
 	int matRow = descriptorquery->getVolume();
 	int matCol = descriptorbase->getVolume();
 	cv::Size matSize(matCol, matRow);
 
-	Parameter2F1 pt(ground.gt, BoWGlobalBest_RGB, BoWGlobalBest_D, BoWGlobalBest_IR, GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR,
+	Parameter2F1 pt(ground.gt, GGglobalResult, BoWGlobalBest_RGB, BoWGlobalBest_D, BoWGlobalBest_IR, GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR,
 		LDBGlobalBest_RGB, LDBGlobalBest_D, LDBGlobalBest_IR, matSize);
 
-	//// use OpenGA to optimize coefficents
+	////// use OpenGA to optimize coefficents
 	std::vector<double> coeff;
 	pt.prepare4MultimodalCoefficients();	
 	optimizeMultimodalCoefficients(&pt, coeff);
 	pt.updateParams(coeff);
 
-	////// calculate score matrix for single descriptor
+	//////// calculate score matrix for single descriptor
 	pt.placeRecognition();
 	//pt.printMatchingResults();
 	std::cout << pt.calculateF1score() << std::endl;
 
 	// sweep the parameter
-	//std::vector<double> coeff = { 0.49, 0.03, 0.45, 0.30, 0.02, 0.12, 0.67, 0.87, 0.55 };
+	//std::vector<double> coeff = { 2.24987526,	0.39806605	,2.02482809,	
+	//	0.49958895	,1.16373923,	0.63717877	,
+	//	0.66855686,	1.53769591	,0.82047087,
+	//	0	};
+	//std::vector<double> coeff = { 0,0,0, 0,0,0, 0,0,0, 1 };
 	//pt.updateParams(coeff);
-	//for (float i = 0; i < 0.2; i+=0.02)
+	//pt.placeRecognition();
+	//pt.printMatchingResults();
+	//std::cout << pt.calculateF1score() << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//for (float i = 0.1; i <= 0.8; i+=0.05)
+	//{
+	//	pt.updateParams(1/i, i, 31);
+	//	pt.placeRecognition();
+	//	std::cout << i<<"\t"<<pt.calculateF1score() << std::endl;
+	//}
+	//std::cout << "\n";
+	//for (float i = 3; i <= 151; i += 4)
+	//{
+	//	pt.updateParams(2.5, 0.4, i);
+	//	pt.placeRecognition();
+	//	std::cout << i << "\t" << pt.calculateF1score() << std::endl;
+	//}
+	//for (float i = 0; i <= 0.2; i += 0.01)
 	//{
 	//	pt.updateParams(i);
 	//	pt.placeRecognition();
-	//	std::cout << pt.calculateF1score() << std::endl;
+	//	std::cout << i << "\t" << pt.calculateF1score() << std::endl;
 	//}
-
 
 }
 

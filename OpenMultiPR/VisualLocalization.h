@@ -16,6 +16,7 @@ public:
 	bool getDistanceMatrix(float GNSS=30);
 	bool getEnhancedDistanceMatrix(int winSize);
 	bool getGlobalSearch(int channelIdx);
+	bool getGlobalSearch();
 	
 private:
 	//bool useDepth, useIR, useRGBDIR, useRGBIR; //应该是不用的，已经在DesciptorGroup中读取过
@@ -41,8 +42,9 @@ private:
 	cv::Mat GISTDistance_RGB, GISTDistance_D, GISTDistance_IR;
 	cv::Mat LDBDistance_RGB, LDBDistance_D, LDBDistance_IR;
 	cv::Mat GPSDistance;
-	cv::Mat GPSMask, GPSMask_uchar;
+	cv::Mat /*GPSMask,*/ GPSMask_uchar;
 	cv::Mat CSDistance;
+	cv::Mat GGDistance;
 	std::string codeBook;
 	//   ----> database
 	//  |
@@ -55,7 +57,8 @@ private:
 	std::vector<int> BoWGlobalBest_RGB, BoWGlobalBest_D, BoWGlobalBest_IR;
 	std::vector<int> GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR;
 	std::vector<int> LDBGlobalBest_RGB, LDBGlobalBest_D, LDBGlobalBest_IR;
-
+	std::vector<int> GPSGlobalBest;
+	std::vector<int> GGglobalResult;
 
 	GroundTruth ground;
 };

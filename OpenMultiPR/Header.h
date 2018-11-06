@@ -8,17 +8,19 @@
 #endif
 
 #ifdef _DEBUG  
-#pragma comment(lib, "opencv_core343d.lib")
-#pragma comment(lib, "opencv_highgui343d.lib")
-#pragma comment(lib, "opencv_imgproc343d.lib")
-#pragma comment(lib, "opencv_imgcodecs343d.lib")
-#pragma comment(lib, "opencv_features2d343d.lib")
-#pragma comment(lib, "opencv_xfeatures2d343d.lib")
+#pragma comment(lib, "opencv_core400d.lib")
+#pragma comment(lib, "opencv_highgui400d.lib")
+#pragma comment(lib, "opencv_imgproc400d.lib")
+#pragma comment(lib, "opencv_imgcodecs400d.lib")
+#pragma comment(lib, "opencv_features2d400d.lib")
+#pragma comment(lib, "opencv_xfeatures2d400d.lib")
+#pragma comment(lib, "opencv_dnn400d.lib")
 #else
-#pragma comment(lib, "opencv_core343.lib")
-#pragma comment(lib, "opencv_highgui343.lib")
-#pragma comment(lib, "opencv_imgproc343.lib")
-#pragma comment(lib, "opencv_imgcodecs343.lib")
-#pragma comment(lib, "opencv_features2d343.lib")
-#pragma comment(lib, "opencv_xfeatures2d343.lib")
+#pragma comment(lib, "opencv_core400.lib")
+#pragma comment(lib, "opencv_highgui400.lib")
+#pragma comment(lib, "opencv_imgproc400.lib")
+#pragma comment(lib, "opencv_imgcodecs400.lib")
+#pragma comment(lib, "opencv_features2d400.lib")
+#pragma comment(lib, "opencv_xfeatures2d400.lib")
+#pragma comment(lib, "opencv_dnn400.lib")
 #endif

@@ -12,8 +12,8 @@
 
 struct Params
 {
-	float lambda[9] = {0,0.2,1,0,0.2,0,0.1,0,0.1};
-	float vmax = 2, vmin = 0.5, numsequence = 31;
+	float lambda[10] = { 2.24987526,	0.39806605	,2.02482809,	0.49958895	,1.16373923,	0.63717877	,0.66855686,	1.53769591	,0.82047087 , 1};
+	float vmax = 2.86, vmin = 0.35, numsequence = 45;
 	float scoreTh = 0;
 };
 
@@ -42,14 +42,14 @@ struct MyMiddleCost
 class Parameter2F1
 {
 	std::vector<std::vector<int>> gt;
-	std::vector<int> pGlobal[9];
+	std::vector<int> pGlobal[10];
 	Params parameters;
 	std::vector<int> matchingResults; // -1 means empty, 1-based results
 	cv::Size matSize;
-	SequenceSearch pSS[9];
+	SequenceSearch pSS[10];
 public:
 	//Parameter2F1(){};
-	Parameter2F1(std::vector<std::vector<int>> gt, std::vector<int> BoWGlobalBest_RGB, std::vector<int> BoWGlobalBest_D, std::vector<int> BoWGlobalBest_IR,
+	Parameter2F1(std::vector<std::vector<int>> gt, std::vector<int> GGGlobalBest, std::vector<int> BoWGlobalBest_RGB, std::vector<int> BoWGlobalBest_D, std::vector<int> BoWGlobalBest_IR,
 		std::vector<int> GISTGlobalBest_RGB, std::vector<int> GISTGlobalBest_D, std::vector<int> GISTGlobalBest_IR,
 		std::vector<int> LDBGlobalBest_RGB, std::vector<int> LDBGlobalBest_D, std::vector<int> LDBGlobalBest_IR, cv::Size matSize) : gt(gt), matSize(matSize)
 	{
@@ -62,11 +62,12 @@ public:
 		pGlobal[6] = LDBGlobalBest_RGB;
 		pGlobal[7] = LDBGlobalBest_D;
 		pGlobal[8] = LDBGlobalBest_IR;
+		pGlobal[9] = GGGlobalBest;
 	};
 	~Parameter2F1() {	};
 	//update different parameters
 	void updateParams(std::vector<double> x){
-		for (size_t i = 0; i < 9; i++)
+		for (size_t i = 0; i < 10; i++)
 		{
 			parameters.lambda[i] = x[i];
 		}
@@ -96,6 +97,7 @@ public:
 	}
 	//calculate F1 score according to groundtruth(gt) and PR results (matchingResults).
 	float calculateF1score();
+	float calculateErr();
 
 	bool eval_genes(const MyGenes& p, MyMiddleCost &c);
 };

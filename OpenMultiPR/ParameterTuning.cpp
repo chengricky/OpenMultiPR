@@ -6,7 +6,7 @@
 
 void init_genes(MyGenes& p, const std::function<double(void)> &rand)
 {
-	for (int i = 0; i < 9; i++) // set the size of init
+	for (int i = 0; i < 10; i++) // set the size of init
 		p.x.push_back(rand());
 }
 
@@ -82,6 +82,7 @@ void SO_report_generation(	int generation_number,	const EA::GenerationType<MyGen
 		<< best_genes.x[6] << "\t"
 		<< best_genes.x[7] << "\t"
 		<< best_genes.x[8] << "\t"
+		<< best_genes.x[9] << "\t"
 		<< "\n";
 }
 
@@ -90,32 +91,54 @@ bool optimizeMultimodalCoefficients(Parameter2F1* pt, std::vector<double>& x)
 	EA::Chronometer timer;
 	timer.tic();
 
-	GA_Type ga_obj;
-	ga_obj.problem_mode = EA::GA_MODE::SOGA;
-	ga_obj.multi_threading = true;
-	ga_obj.dynamic_threading = false;
-	ga_obj.idle_delay_us = 0; // switch between threads quickly
-	ga_obj.verbose = false;
-	ga_obj.population = 500;
-	ga_obj.generation_max = 200;
-	ga_obj.calculate_SO_total_fitness = calculate_SO_total_fitness;
-	ga_obj.init_genes = init_genes;
-	ga_obj.eval_genes = std::bind(&Parameter2F1::eval_genes, pt, std::placeholders::_1,std::placeholders::_2);
-	ga_obj.mutate = mutate;
-	ga_obj.crossover = crossover;
-	ga_obj.SO_report_generation = SO_report_generation;
-	ga_obj.best_stall_max = 200;
-	ga_obj.average_stall_max = 200;
-	ga_obj.tol_stall_best = -1;
-	ga_obj.tol_stall_average = -1;
-	ga_obj.elite_count = 50;
-	ga_obj.crossover_fraction = 0.7;
-	ga_obj.mutation_rate = 0.3;
-	
-	std::cout<<"STOP Reason: "<< ga_obj.stop_reason_to_string(ga_obj.solve())<< std::endl;
-	x = ga_obj.last_generation.chromosomes[ga_obj.last_generation.best_chromosome_index].genes.x;
-	std::cout << "The problem is optimized in " << timer.toc() << " seconds." << std::endl;
+	std::vector<std::vector<double>> xVec;
+	std::vector<float> f1Vec;
+	for (size_t i = 0; i < 10; i++)
+	{
+		GA_Type ga_obj;
+		ga_obj.problem_mode = EA::GA_MODE::SOGA;
+		ga_obj.multi_threading = true;
+		ga_obj.dynamic_threading = false;
+		ga_obj.idle_delay_us = 0; // switch between threads quickly
+		ga_obj.verbose = false;
+		ga_obj.population = 500;
+		ga_obj.generation_max = 100;
+		ga_obj.calculate_SO_total_fitness = calculate_SO_total_fitness;
+		ga_obj.init_genes = init_genes;
+		ga_obj.eval_genes = std::bind(&Parameter2F1::eval_genes, pt, std::placeholders::_1, std::placeholders::_2);
+		ga_obj.mutate = mutate;
+		ga_obj.crossover = crossover;
+		ga_obj.SO_report_generation = SO_report_generation;
+		ga_obj.best_stall_max = 100;
+		ga_obj.average_stall_max = 100;
+		ga_obj.tol_stall_best = -1;
+		ga_obj.tol_stall_average = -1;
+		ga_obj.elite_count = 50;
+		ga_obj.crossover_fraction = 0.7;
+		ga_obj.mutation_rate = 0.3;
 
+		std::cout << "STOP Reason: " << ga_obj.stop_reason_to_string(ga_obj.solve()) << std::endl;
+		xVec.push_back(ga_obj.last_generation.chromosomes[ga_obj.last_generation.best_chromosome_index].genes.x);
+		f1Vec.push_back(-ga_obj.last_generation.chromosomes[ga_obj.last_generation.best_chromosome_index].middle_costs.cost);
+	}
+	auto iter_max = std::max_element(f1Vec.begin(), f1Vec.end());
+	x = *(xVec.begin() + int(iter_max - f1Vec.begin()));
+	std::cout << "Optimized Coeffs\t";
+	for (auto e : x)
+	{
+		std::cout << e<<" ";
+	}
+	std::cout << "\nf1:  " << *(f1Vec.begin() + int(iter_max - f1Vec.begin()));
+	std::cout << "\nThe problem is optimized in " << timer.toc() << " seconds." << std::endl;
+	for (size_t i = 0; i < f1Vec.size(); i++)
+	{
+		std::cout << "\nf1:  " << f1Vec[i]<<"\n";
+		std::cout << "Optimized Coeffs\t";
+		for (auto e : xVec[i])
+		{
+			std::cout << e << " ";
+		}
+	}
 	return true;
 }
 
@@ -142,7 +165,7 @@ void Parameter2F1::placeRecognition()
 	cv::Mat synScoreMat(matSize, CV_32FC1);
 	synScoreMat.setTo(0);
 	float sum = 0;
-	for (size_t i = 0; i < 9; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		pSS[i].init((pGlobal[i]), matSize, parameters.numsequence, parameters.vmin, parameters.vmax);
 		pSS[i].coneSearch();
@@ -172,7 +195,7 @@ void Parameter2F1::placeRecognition()
 
 void Parameter2F1::prepare4MultimodalCoefficients()
 {
-	for (size_t i = 0; i < 9; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		pSS[i].init((pGlobal[i]), matSize, parameters.numsequence, parameters.vmin, parameters.vmax);
 		pSS[i].coneSearch();
@@ -185,7 +208,7 @@ float Parameter2F1::placeRecognition4MultimodalCoefficients(const MyGenes& p)
 	cv::Mat synScoreMat(matSize, CV_32FC1);
 	synScoreMat.setTo(0);
 	float sum = 0;
-	for (size_t i = 0; i < 9; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		synScoreMat += p.x[i] * (pSS[i].scoreMat);
 		sum += p.x[i];
@@ -311,4 +334,42 @@ float Parameter2F1::calculateF1score()
 	float r = (float)tp / (tp + fn);
 	float f1 = 2 * (p*r) / (p + r);
 	return f1;
+}
+
+
+float Parameter2F1::calculateErr()
+{
+	cv::Mat plotPR(matSize.height, matSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
+	for (size_t i = 0; i < gt.size(); i++)
+	{
+		if (!gt[i].empty())
+		{
+			for (auto var : gt[i])
+			{
+				plotPR.at<cv::Vec3b>(i, var - 1) = cv::Vec3b(0, 255, 0);
+			}
+		}
+	}
+	for (size_t i = 0; i < matchingResults.size(); i++)
+	{
+		if (matchingResults[i] != -1)
+			plotPR.at<cv::Vec3b>(i, matchingResults[i] - 1) = cv::Vec3b(0, 0, 255);
+	}
+	cv::resize(plotPR, plotPR, matSize * 2);
+	cv::imshow("plotPR", plotPR);
+	cv::waitKey(1);
+	int err_sum = 0, num_sum = 0;
+	for (size_t i = 0; i < gt.size(); i++)
+	{
+		if (!gt[i].empty()&& matchingResults[i] != -1) // ground truth is not empty 
+		{
+			std::vector<int>::iterator ret = std::find(gt[i].begin(), gt[i].end(), matchingResults[i]);
+			if (ret == gt[i].end()) // no findings
+			{
+				err_sum += std::min(std::abs(matchingResults[i]- *(gt[i].begin())), std::abs(matchingResults[i] - *(gt[i].end())));
+			}
+			num_sum += 1;
+		}
+	}
+	return float(err_sum)/ num_sum;
 }

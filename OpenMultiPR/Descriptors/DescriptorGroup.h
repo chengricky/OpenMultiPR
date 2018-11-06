@@ -16,6 +16,7 @@ public:
 	PicGNSSFile picFiles;
 	std::string picPath;
 	cv::Mat CS;
+	cv::Mat GG;
 	// 按顺序分别是RGB\D\IR图像的描述子
 	cv::Mat GIST_RGB, GIST_D, GIST_IR;
 	cv::Mat LDB_RGB, LDB_D, LDB_IR;

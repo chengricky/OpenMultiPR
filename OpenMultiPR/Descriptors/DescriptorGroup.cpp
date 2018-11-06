@@ -68,6 +68,7 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 	{
 		extraction.add(new CSExtractor(0, config.dImgSize));
 	}
+	extraction.add(new GoogLeNetExtractor(0));
 
 	while (picFiles.doMain())
 	{
@@ -85,6 +86,7 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 		cv::Mat xLDB;//height1 width173		
 		cv::Mat xORB;//height32 width...(distance相加？)//由于只有一个
 		cv::Mat xCS;
+		cv::Mat xGG;
 
 		// save the descriptor of GIST and LDB
 		Timer timer;
@@ -117,15 +119,12 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 				CSExtractor* pCS = static_cast<CSExtractor*>(pDescriptor);
 				(pCS->getResult()).copyTo(xCS);
 			}
+			else if (typeid(*pDescriptor) == typeid(GoogLeNetExtractor))
+			{
+				GoogLeNetExtractor* pGG = static_cast<GoogLeNetExtractor*>(pDescriptor);
+				(pGG->getResult()).copyTo(xGG);
+			}
 		}
-		//if (!xLDBChannel.empty())
-		//{
-		//	cv::merge(xLDBChannel, xLDB);
-		//}
-		//if (!xGISTChannel.empty())
-		//{
-		//	cv::merge(xGISTChannel, xGIST);
-		//}
 
 		timer.stop();
 		std::cout << "Time consumed: ";
@@ -134,21 +133,49 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 		/*CS*/
 		CS.push_back(xCS);
 		/*GIST*/
-		//GIST.push_back(xGIST);
-		GIST_RGB.push_back(xGISTChannel[0]);
-		GIST_D.push_back(xGISTChannel[1]);
-		GIST_IR.push_back(xGISTChannel[2]);
+		if (xGISTChannel.size()>=1)
+		{
+			GIST_RGB.push_back(xGISTChannel[0]);
+			if (xGISTChannel.size() >= 2)
+			{
+				GIST_D.push_back(xGISTChannel[1]);
+				if (xGISTChannel.size() >= 3)
+				{
+					GIST_IR.push_back(xGISTChannel[2]);
+				}
+			}			
+		}
 		/*LDB*/
-		//LDB.push_back(xLDB);
-		LDB_RGB.push_back(xLDBChannel[0]);
-		LDB_D.push_back(xLDBChannel[1]);
-		LDB_IR.push_back(xLDBChannel[2]);
+		if (xLDBChannel.size()>=1)
+		{
+			LDB_RGB.push_back(xLDBChannel[0]);
+			if (xLDBChannel.size() >= 2)
+			{
+				LDB_D.push_back(xLDBChannel[1]);
+				if (xLDBChannel.size() >= 3)
+				{
+					LDB_IR.push_back(xLDBChannel[2]);
+				}				
+			}
+		}
 		/*ORB*/
-		//ORB.push_back(xORB);
-		ORB_RGB.push_back(xORBChannel[0]);
-		ORB_D.push_back(xORBChannel[1]);
-		ORB_IR.push_back(xORBChannel[2]);
+		if (xORBChannel.size()>=1)
+		{
+			ORB_RGB.push_back(xORBChannel[0]);
+			if (xORBChannel.size() >= 2)
+			{
+				ORB_D.push_back(xORBChannel[1]);
+				if (xORBChannel.size() >= 3)
+				{
+					ORB_IR.push_back(xORBChannel[2]);
+				}				
+			}
+		}
+
 		//cv::waitKey(1);
+		/*GG*/
+		GG.push_back(xGG);
+
 	}
 }
 
@@ -163,7 +190,7 @@ std::vector<cv::Mat> Descriptors::getAllImage(const PicGNSSFile& picsRec, const 
 	if (!isColor)
 	{
 		cv::Mat tmp;
-		cvtColor(picsRec.colorImg, tmp, CV_BGR2GRAY);
+		cvtColor(picsRec.colorImg, tmp, cv::COLOR_BGR2GRAY);
 		cv::resize(tmp, todoImages[0], imgSize);
 	}
 	if (!picsRec.depthImg.empty())
