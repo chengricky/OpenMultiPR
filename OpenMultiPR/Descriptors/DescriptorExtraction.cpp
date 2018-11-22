@@ -53,7 +53,7 @@ bool GoogLeNetExtractor::extract(std::vector<cv::Mat> img)
 	result = cv::Mat();
 	cv::Mat imgResize;
 	cv::resize(img[imgIdx], imgResize, cv::Size(224, 224));
-	net.setInput(cv::dnn::blobFromImage(imgResize, 1, cv::Size(224, 224), cv::Scalar(104, 117, 123)), "data");
+	net.setInput(cv::dnn::blobFromImage(imgResize, 1, cv::Size(224, 224), cv::Scalar(104.051007218, 112.514489108, 116.676038934)), "data");
 
 	std::vector<std::string> layers;
 	layers.push_back("inception_3a/3x3_reduce");
@@ -67,11 +67,13 @@ bool GoogLeNetExtractor::extract(std::vector<cv::Mat> img)
 		result.push_back(feature_GoogLeNet.at<float>(0, id));
 	}
 	result = result.reshape(1, 1);
+	return true;
 }
 
 ORBExtractor::ORBExtractor(int imgIdx): OCVExtractor(imgIdx)
 {
-	detector = cv::ORB::create(500, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); 	// BoW使用默认配置获得ORB特征
+	detector = cv::ORB::create(1000, 1.2f, 8, 19, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); //same with the paper "ORBSLAM2"
+	//detector = cv::ORB::create(500, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); 	// BoW使用默认配置获得ORB特征
 }
 
 SURFExtractor::SURFExtractor(int imgIdx) : OCVExtractor(imgIdx)
@@ -94,7 +96,7 @@ bool GISTExtractor::extract(std::vector<cv::Mat> todoImages)
 	cls::GIST gist_ext(GIST_PARAMS);
 	std::vector<float> result_vec;
 	gist_ext.extract(todoImages[imgIdx], result_vec, isNormalize);//输入彩色图，内部会自动根据DEFAULT_PARAMS需要，转换灰度	
-	result = cv::Mat(result_vec).reshape(1, 1);
+	cv::Mat(result_vec).reshape(1, 1).copyTo(result);
 	return true;
 }
 
@@ -226,11 +228,11 @@ ImgDescriptorExtractor* Extraction::getResult(int idx)
 
 Extraction::~Extraction()
 {
-	for (size_t i = 0; i < extractions.size(); i++)
-	{
-		delete extractions[i];
-	}
-	extractions.clear();
+	//for (size_t i = 0; i < extractions.size(); i++)
+	//{
+	//	delete extractions[i];
+	//}
+	//extractions.clear();
 }
 
 void Extraction::run(std::vector<cv::Mat> const&  todoImages) {

@@ -17,12 +17,11 @@ public:
 	std::string picPath;
 	cv::Mat CS;
 	cv::Mat GG;
-	// 按顺序分别是RGB\D\IR图像的描述子
-	cv::Mat GIST_RGB, GIST_D, GIST_IR;
-	cv::Mat LDB_RGB, LDB_D, LDB_IR;
-	std::vector<cv::Mat> ORB_RGB, ORB_D, ORB_IR;
-	//std::vector<cv::Mat> SURF;
-
+	// GIST_RGB, GIST_D, GIST_IR;
+	cv::Mat GIST[3];
+	// LDB_RGB, LDB_D, LDB_IR;
+	cv::Mat LDB[3];
+	std::vector<cv::Mat> ORB_RGB, /*ORB_D,*/ ORB_IR;
 	cv::Mat GPS;
 
 	int getVolume() { return picFiles.getFileVolume(); };

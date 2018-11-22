@@ -6,7 +6,7 @@
 
 void init_genes(MyGenes& p, const std::function<double(void)> &rand)
 {
-	for (int i = 0; i < 10; i++) // set the size of init
+	for (int i = 0; i < 9; i++) // set the size of init
 		p.x.push_back(rand());
 }
 
@@ -82,7 +82,6 @@ void SO_report_generation(	int generation_number,	const EA::GenerationType<MyGen
 		<< best_genes.x[6] << "\t"
 		<< best_genes.x[7] << "\t"
 		<< best_genes.x[8] << "\t"
-		<< best_genes.x[9] << "\t"
 		<< "\n";
 }
 
@@ -93,7 +92,7 @@ bool optimizeMultimodalCoefficients(Parameter2F1* pt, std::vector<double>& x)
 
 	std::vector<std::vector<double>> xVec;
 	std::vector<float> f1Vec;
-	for (size_t i = 0; i < 10; i++)
+	for (size_t i = 0; i < 15; i++)
 	{
 		GA_Type ga_obj;
 		ga_obj.problem_mode = EA::GA_MODE::SOGA;
@@ -102,7 +101,7 @@ bool optimizeMultimodalCoefficients(Parameter2F1* pt, std::vector<double>& x)
 		ga_obj.idle_delay_us = 0; // switch between threads quickly
 		ga_obj.verbose = false;
 		ga_obj.population = 500;
-		ga_obj.generation_max = 100;
+		ga_obj.generation_max = 80;
 		ga_obj.calculate_SO_total_fitness = calculate_SO_total_fitness;
 		ga_obj.init_genes = init_genes;
 		ga_obj.eval_genes = std::bind(&Parameter2F1::eval_genes, pt, std::placeholders::_1, std::placeholders::_2);
@@ -165,7 +164,7 @@ void Parameter2F1::placeRecognition()
 	cv::Mat synScoreMat(matSize, CV_32FC1);
 	synScoreMat.setTo(0);
 	float sum = 0;
-	for (size_t i = 0; i < 10; i++)
+	for (size_t i = 0; i < 9; i++)
 	{
 		pSS[i].init((pGlobal[i]), matSize, parameters.numsequence, parameters.vmin, parameters.vmax);
 		pSS[i].coneSearch();
@@ -195,7 +194,7 @@ void Parameter2F1::placeRecognition()
 
 void Parameter2F1::prepare4MultimodalCoefficients()
 {
-	for (size_t i = 0; i < 10; i++)
+	for (size_t i = 0; i < 9; i++)
 	{
 		pSS[i].init((pGlobal[i]), matSize, parameters.numsequence, parameters.vmin, parameters.vmax);
 		pSS[i].coneSearch();
@@ -208,7 +207,7 @@ float Parameter2F1::placeRecognition4MultimodalCoefficients(const MyGenes& p)
 	cv::Mat synScoreMat(matSize, CV_32FC1);
 	synScoreMat.setTo(0);
 	float sum = 0;
-	for (size_t i = 0; i < 10; i++)
+	for (size_t i = 0; i < 9; i++)
 	{
 		synScoreMat += p.x[i] * (pSS[i].scoreMat);
 		sum += p.x[i];
@@ -274,7 +273,7 @@ float Parameter2F1::placeRecognition4MultimodalCoefficients(const MyGenes& p)
 	return f1;
 }
 
-float Parameter2F1::calculateF1score()
+float Parameter2F1::calculateF1score(float* precision, float* recall)
 {
 	cv::Mat plotPR(matSize.height, matSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
 	for (size_t i = 0; i < gt.size(); i++)
@@ -333,6 +332,14 @@ float Parameter2F1::calculateF1score()
 	float p = (float)tp / (tp + fp);
 	float r = (float)tp / (tp + fn);
 	float f1 = 2 * (p*r) / (p + r);
+	if (precision!=nullptr)
+	{
+		*precision = p;
+	}
+	if (recall!=nullptr)
+	{
+		*recall = r;
+	}
 	return f1;
 }
 
@@ -366,7 +373,8 @@ float Parameter2F1::calculateErr()
 			std::vector<int>::iterator ret = std::find(gt[i].begin(), gt[i].end(), matchingResults[i]);
 			if (ret == gt[i].end()) // no findings
 			{
-				err_sum += std::min(std::abs(matchingResults[i]- *(gt[i].begin())), std::abs(matchingResults[i] - *(gt[i].end())));
+				//err_sum += std::min(std::abs(matchingResults[i]- *(gt[i].begin())), std::abs(matchingResults[i] - *(gt[i].end()-1)));
+				err_sum += std::abs(matchingResults[i] - (*(gt[i].begin()) + *(gt[i].end() - 1))/2.0);
 			}
 			num_sum += 1;
 		}

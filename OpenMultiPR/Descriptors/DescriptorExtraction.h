@@ -9,12 +9,13 @@
 class ImgDescriptorExtractor
 {
 protected:
-	int imgIdx; //the index of input RGBD-(IR)-(D) image group
+	int imgIdx; //the index of input RGBD-(IR)-(D) image group	
 	cv::Mat result;
-public:
-	ImgDescriptorExtractor(int imgIdx) : imgIdx(imgIdx) {};
+public:		
+	ImgDescriptorExtractor(int imgIdx) : imgIdx(imgIdx), result() {};
 	virtual bool extract(std::vector<cv::Mat>  img) = 0;
 	cv::Mat getResult() { return result; };
+	int getImgIdx() { return imgIdx; };
 };
 
 class OCVExtractor : public ImgDescriptorExtractor
@@ -83,6 +84,7 @@ class Extraction
 public:
 	virtual ~Extraction();
 	void add(ImgDescriptorExtractor* c) { extractions.push_back(c); }
+	void release() { for (auto p : extractions) delete p; }
 	void run(std::vector<cv::Mat> const&  todoImages);
 	ImgDescriptorExtractor* getResult(int idx);
 	int getSize() { return extractions.size(); };

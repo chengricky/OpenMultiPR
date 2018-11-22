@@ -15,6 +15,7 @@
 #pragma comment(lib, "opencv_features2d400d.lib")
 #pragma comment(lib, "opencv_xfeatures2d400d.lib")
 #pragma comment(lib, "opencv_dnn400d.lib")
+#pragma comment(lib, "opencv_videoio400d.lib")
 #else
 #pragma comment(lib, "opencv_core400.lib")
 #pragma comment(lib, "opencv_highgui400.lib")
@@ -23,4 +24,5 @@
 #pragma comment(lib, "opencv_features2d400.lib")
 #pragma comment(lib, "opencv_xfeatures2d400.lib")
 #pragma comment(lib, "opencv_dnn400.lib")
+#pragma comment(lib, "opencv_videoio400.lib")
 #endif

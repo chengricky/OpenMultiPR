@@ -14,20 +14,24 @@ void SequenceSearch::coneSearch()//±ØÐëÎªÆæÊý
 		return;
 	}
 	scoreMat.create(matSize, CV_32FC1);
-	for (size_t i = 0; i < matSize.height; i++)//query
+	for (int i = 0; i < matSize.height; i++)//query
 	{
 		float* pS = scoreMat.ptr<float>(i);
-		for (size_t j = 0; j < matSize.width; j++)//database
+		for (int j = 0; j < matSize.width; j++)//database
 		{
-			int count = 0;
-			int min_y = std::max(0, (int)i - (numSearch - 1) / 2);
-			int max_y = std::min((int)i + (numSearch - 1) / 2, matSize.height - 1);
-			for (size_t k = min_y; k <= max_y; k++)//query within coneopen
+			int count = 0;			
+			// on-line mode
+			int min_y = std::max(0, (int)i - (numSearch - 1) );
+			int max_y = i;
+			// off-lin mode
+			//int min_y = std::max(0, (int)i - (numSearch - 1) / 2);
+			//int max_y = std::min((int)i + (numSearch - 1) / 2, matSize.height - 1);
+			for (int k = min_y; k <= max_y; k++)//query within coneopen
 			{
-				int min_x, max_x;
+				int min_x=-1, max_x=-1;
 				if (k<i)
 				{
-					min_x = std::max((k - i)*vmax + j, 0.0f);
+					min_x = std::max(int((k - i)*vmax + j), 0);
 					max_x =  (k - i)*vmin + j;
 				}
 				else

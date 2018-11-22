@@ -4,10 +4,10 @@
 #PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Lib\\query\\"
 #PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Gate\\reference\\"
 #PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Gate\\query\\"
-#PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\reference\\"
-#PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\query\\"
-PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\Gate-T3\\reference\\"
-PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\Gate-T3\\query\\"
+PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\reference\\"
+PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\query\\"
+#PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\Gate-T3\\reference\\"
+#PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\Gate-T3\\query\\"
 BoW_CodeBook: "D:\\Dependencies\\DBoW3\\bin\\orbvoc.dbow3"
 # read "Image"=0 or "Feature"=1 from files
 FileType: 0
@@ -15,8 +15,8 @@ FileType: 0
 ColorImg: 1 # color is essential for place recognition
 DepthImg: 1
 InfraredImg: 1
-databaseImgSize: [ 640, 480 ]
-queryImgSize: [ 640, 480 ]
+databaseImgSize: [ 320, 240 ]
+queryImgSize: [ 320, 240 ]
 # Descriptor: LDB is effective for all images, other descriptor is used for COLOR image only.
 GIST: 1
 CS: 0

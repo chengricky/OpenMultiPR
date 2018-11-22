@@ -10,6 +10,11 @@
 using namespace DBoW3;
 using namespace std;
 
+//#define GAsearch
+//#define Sweepingsearch
+#define TEST
+//#define GPS_TEST
+
 VisualLocalization::VisualLocalization(GlobalConfig& config)
 { 	
 	if (!config.getValid())
@@ -20,6 +25,9 @@ VisualLocalization::VisualLocalization(GlobalConfig& config)
 	std::cout << "Database Images is read." << std::endl;
 	descriptorquery = new Descriptors(config, false);
 	std::cout << "Query Images is read." << std::endl;
+	matRow = descriptorquery->getVolume();
+	matCol = descriptorbase->getVolume();
+
 	this->codeBook = config.codeBook;
 	cv::destroyAllWindows();
 	ground.init(config.pathTest + "of.txt", config.pathRec + "of.txt");
@@ -41,49 +49,31 @@ VisualLocalization::~VisualLocalization()
 bool VisualLocalization::getDistanceMatrix(int channelIdx)
 {
 	// 对于测试集数据和训练集数据,获取不同距离的Matrix,Matrix为empty则代表没有该项距离
-	int matRow = descriptorquery->getVolume();
-	int matCol = descriptorbase->getVolume();
 	// GIST
-	cv::Mat GISTQuery, GISTRef, *GISTDistance = nullptr;
-	switch (channelIdx)
+	if ((descriptorquery->GIST)[channelIdx].empty() || (descriptorbase->GIST)[channelIdx].empty())
 	{
-	case 0: GISTQuery = descriptorquery->GIST_RGB; GISTRef = descriptorbase->GIST_RGB; GISTDistance = &GISTDistance_RGB; break;
-	case 1: GISTQuery = descriptorquery->GIST_D; GISTRef = descriptorbase->GIST_D; GISTDistance = &GISTDistance_D; break;
-	case 2: GISTQuery = descriptorquery->GIST_IR; GISTRef = descriptorbase->GIST_IR; GISTDistance = &GISTDistance_IR; break;
-	default:
-		break;
-	}
-	if (GISTQuery.empty() || GISTRef.empty())
-	{
-		*GISTDistance = cv::Mat();
+		GISTDistance[channelIdx] = cv::Mat();
 	}
 	else
 	{
-		*GISTDistance = cv::Mat(matRow, matCol, CV_32FC1);
+		GISTDistance[channelIdx] = cv::Mat(matRow, matCol, CV_32FC1);
 		for (size_t i = 0; i < matRow; i++)
 			for (size_t j = 0; j < matCol; j++)
-				GISTDistance->at<float>(i, j) = cv::norm(GISTQuery.row(i), GISTRef.row(j), cv::NORM_L2);
+				GISTDistance[channelIdx].at<float>(i, j) = 
+				cv::norm((descriptorquery->GIST)[channelIdx].row(i), (descriptorbase->GIST)[channelIdx].row(j), cv::NORM_L2);
 	}
 	// LDB
-	cv::Mat LDBQuery, LDBRef, *LDBDistance = nullptr;
-	switch (channelIdx)
+	if ((descriptorquery->LDB)[channelIdx].empty() || (descriptorbase->LDB)[channelIdx].empty())
 	{
-	case 0: LDBQuery = descriptorquery->LDB_RGB; LDBRef = descriptorbase->LDB_RGB; LDBDistance = &LDBDistance_RGB; break;
-	case 1: LDBQuery = descriptorquery->LDB_D; LDBRef = descriptorbase->LDB_D; LDBDistance = &LDBDistance_D; break;
-	case 2: LDBQuery = descriptorquery->LDB_IR; LDBRef = descriptorbase->LDB_IR; LDBDistance = &LDBDistance_IR; break;
-	default:
-		break;
-	}
-	if (LDBQuery.empty() || LDBRef.empty())
-	{
-		*LDBDistance = cv::Mat();
+		LDBDistance[channelIdx] = cv::Mat();
 	}
 	else
 	{
-		*LDBDistance = cv::Mat(matRow, matCol, CV_32FC1);
+		LDBDistance[channelIdx] = cv::Mat(matRow, matCol, CV_32FC1);
 		for (size_t i = 0; i < matRow; i++)
 			for (size_t j = 0; j < matCol; j++)
-				LDBDistance->at<float>(i, j) = hamming_matching(LDBQuery.row(i), LDBRef.row(j));
+				LDBDistance[channelIdx].at<float>(i, j) = 
+				hamming_matching((descriptorquery->LDB)[channelIdx].row(i), (descriptorbase->LDB)[channelIdx].row(j));
 	}
 
 	return true;
@@ -153,14 +143,17 @@ bool VisualLocalization::getGlobalSearch(int channelIdx)
 	switch (channelIdx)
 	{
 	case 0: ORBQuery = descriptorquery->ORB_RGB; ORBRef = descriptorbase->ORB_RGB; BoWGlobalBest = &BoWGlobalBest_RGB; break;
-	case 1: ORBQuery = descriptorquery->ORB_D; ORBRef = descriptorbase->ORB_D; BoWGlobalBest = &BoWGlobalBest_D;  break;
+	case 1: ORBQuery = std::vector<cv::Mat>(); ORBRef = std::vector<cv::Mat>(); /*BoWGlobalBest = &BoWGlobalBest_D; */ break;
 	case 2: ORBQuery = descriptorquery->ORB_IR; ORBRef = descriptorbase->ORB_IR; BoWGlobalBest = &BoWGlobalBest_IR; break;
 	default:
 		break;
 	}
 	if (ORBQuery.empty() || ORBRef.empty())
 	{
-		(*BoWGlobalBest) = cv::Mat();
+		if (BoWGlobalBest)
+		{
+			(*BoWGlobalBest) = cv::Mat();
+		}		
 	}
 	else
 	{
@@ -203,30 +196,28 @@ bool VisualLocalization::getGlobalSearch(int channelIdx)
 #endif // DEBUG
 	}
 
-	cv::Mat LDBdistanceMat, GISTdistanceMat;
+	//cv::Mat LDBdistanceMat, GISTdistanceMat;
 	std::vector<int> *LDBglobalResult = nullptr, *GISTglobalResult = nullptr;
 	switch (channelIdx)
 	{
-	case 0: LDBdistanceMat = LDBDistance_RGB; GISTdistanceMat = GISTDistance_RGB; LDBglobalResult = &LDBGlobalBest_RGB; GISTglobalResult = &GISTGlobalBest_RGB; break;
-	case 1: LDBdistanceMat = LDBDistance_D; GISTdistanceMat = GISTDistance_D; LDBglobalResult = &LDBGlobalBest_D; GISTglobalResult = &GISTGlobalBest_D; break;
-	case 2: LDBdistanceMat = LDBDistance_IR; GISTdistanceMat = GISTDistance_IR; LDBglobalResult = &LDBGlobalBest_IR; GISTglobalResult = &GISTGlobalBest_IR;  break;
+	case 0: LDBglobalResult = &LDBGlobalBest_RGB; GISTglobalResult = &GISTGlobalBest_RGB; break;
+	case 1: LDBglobalResult = &LDBGlobalBest_D; GISTglobalResult = &GISTGlobalBest_D; break;
+	case 2: LDBglobalResult = &LDBGlobalBest_IR; GISTglobalResult = &GISTGlobalBest_IR;  break;
 	default:
 		break;
 	}
-	//LDBdistanceMat = LDBdistanceMat & GPSMask;
-	//GISTdistanceMat = GISTdistanceMat & GPSMask;
-	LDBdistanceMat.setTo(FLT_MAX, GPSMask_uchar);
-	GISTdistanceMat.setTo(FLT_MAX, GPSMask_uchar);
+	LDBDistance[channelIdx].setTo(FLT_MAX, GPSMask_uchar);
+	GISTDistance[channelIdx].setTo(FLT_MAX, GPSMask_uchar);
 
-	for (size_t i = 0; i < LDBdistanceMat.rows; i++)//query
+	for (size_t i = 0; i < matRow; i++)//query
 	{
 		//When minIdx is not NULL, it must have at least 2 elements (as well as maxIdx), even if src is a single-row or single-column matrix.
 		//In OpenCV (following MATLAB) each array has at least 2 dimensions, i.e. single-column matrix is Mx1 matrix (and therefore minIdx/maxIdx will be (i1,0)/(i2,0)) 
 		//and single-row matrix is 1xN matrix (and therefore minIdx/maxIdx will be (0,j1)/(0,j2)).
 		int* minPos = new int[2];
-		cv::minMaxIdx(LDBdistanceMat.row(i), nullptr, nullptr, minPos, nullptr);	//可否改成top-k		?
+		cv::minMaxIdx(LDBDistance[channelIdx].row(i), nullptr, nullptr, minPos, nullptr);	//可否改成top-k		?
 		LDBglobalResult->push_back(minPos[1]);
-		cv::minMaxIdx(GISTdistanceMat.row(i), nullptr, nullptr, minPos, nullptr);
+		cv::minMaxIdx(GISTDistance[channelIdx].row(i), nullptr, nullptr, minPos, nullptr);
 		GISTglobalResult->push_back(minPos[1]);
 		delete minPos;
 	}
@@ -235,26 +226,28 @@ bool VisualLocalization::getGlobalSearch(int channelIdx)
 
 bool VisualLocalization::getGlobalSearch()//GPS global best
 {
+#ifdef GPS_TEST
 	/// only GPS localization
-	//cv::Mat GPSdistanceMat = GPSDistance & GPSMask;
-	//GPSdistanceMat.setTo(FLT_MAX, ~GPSMask_uchar);
-	//for (size_t i = 0; i < GPSdistanceMat.rows; i++)//query
-	//{
-	//	//When minIdx is not NULL, it must have at least 2 elements (as well as maxIdx), even if src is a single-row or single-column matrix.
-	//	//In OpenCV (following MATLAB) each array has at least 2 dimensions, i.e. single-column matrix is Mx1 matrix (and therefore minIdx/maxIdx will be (i1,0)/(i2,0)) 
-	//	//and single-row matrix is 1xN matrix (and therefore minIdx/maxIdx will be (0,j1)/(0,j2)).
-	//	int* minPos = new int[2];
-	//	cv::minMaxIdx(GPSdistanceMat.row(i), nullptr, nullptr, minPos, nullptr);	//可否改成top-k		?
-	//	BoWGlobalBest_RGB.push_back(minPos[1]);
-	//	delete minPos;
-	//}
+	cv::Mat GPSdistanceMat = GPSDistance;
+	GPSdistanceMat.setTo(FLT_MAX, GPSMask_uchar);
+	for (size_t i = 0; i < matRow; i++)//query
+	{
+		//When minIdx is not NULL, it must have at least 2 elements (as well as maxIdx), even if src is a single-row or single-column matrix.
+		//In OpenCV (following MATLAB) each array has at least 2 dimensions, i.e. single-column matrix is Mx1 matrix (and therefore minIdx/maxIdx will be (i1,0)/(i2,0)) 
+		//and single-row matrix is 1xN matrix (and therefore minIdx/maxIdx will be (0,j1)/(0,j2)).
+		int* minPos = new int[2];
+		cv::minMaxIdx(GPSdistanceMat.row(i), nullptr, nullptr, minPos, nullptr);	//可否改成top-k		?
+		GPSGlobalBest.push_back(minPos[1]);
+		delete minPos;
+	}
+#endif // GPS_TEST
 
 	/// GoogLeNet 
 	//cv::Mat GGdistanceMat = GGDistance & GPSMask;
 	cv::Mat GGdistanceMat = GGDistance;
 	GGdistanceMat.setTo(FLT_MAX, GPSMask_uchar);
 
-	for (size_t i = 0; i < GGdistanceMat.rows; i++)//query
+	for (size_t i = 0; i < matRow; i++)//query
 	{
 		//When minIdx is not NULL, it must have at least 2 elements (as well as maxIdx), even if src is a single-row or single-column matrix.
 		//In OpenCV (following MATLAB) each array has at least 2 dimensions, i.e. single-column matrix is Mx1 matrix (and therefore minIdx/maxIdx will be (i1,0)/(i2,0)) 
@@ -278,55 +271,145 @@ void VisualLocalization::getBestMatch()
 		getGlobalSearch(i);
 	}
 	getGlobalSearch();
-
-	int matRow = descriptorquery->getVolume();
-	int matCol = descriptorbase->getVolume();
 	cv::Size matSize(matCol, matRow);
 
-	Parameter2F1 pt(ground.gt, GGglobalResult, BoWGlobalBest_RGB, BoWGlobalBest_D, BoWGlobalBest_IR, GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR,
+#ifdef GPS_TEST
+	Parameter2F1 pt(ground.gt, GGglobalResult, GPSGlobalBest, BoWGlobalBest_D, BoWGlobalBest_IR, GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR,
 		LDBGlobalBest_RGB, LDBGlobalBest_D, LDBGlobalBest_IR, matSize);
+	float *p = new float;
+	float *r = new float;
+	std::cout << "GPS_TEST" << std::endl;
+	std::vector<double> coeff4 = { 1,0,0, 0,0,0, 0,0,0, 0 };
+	pt.updateParams(coeff4);
+	pt.updateParams(0);
+	pt.updateParams(1, 1, 1);
+	pt.placeRecognition();
+	//pt.printMatchingResults();
+	std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	std::cout << pt.calculateErr() << std::endl;
+	std::cout << "-----" << std::endl;
+#else
+	Parameter2F1 pt(ground.gt, GGglobalResult, BoWGlobalBest_RGB, /*BoWGlobalBest_D,*/ BoWGlobalBest_IR, GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR,
+		LDBGlobalBest_RGB, LDBGlobalBest_D, LDBGlobalBest_IR, matSize);
+#endif // GPS_TEST
 
-	////// use OpenGA to optimize coefficents
+
+#ifdef GAsearch
+	//// use OpenGA to optimize coefficents
 	std::vector<double> coeff;
-	pt.prepare4MultimodalCoefficients();	
+	pt.prepare4MultimodalCoefficients();
 	optimizeMultimodalCoefficients(&pt, coeff);
 	pt.updateParams(coeff);
-
-	//////// calculate score matrix for single descriptor
+	////// calculate score matrix for single descriptor
 	pt.placeRecognition();
 	//pt.printMatchingResults();
 	std::cout << pt.calculateF1score() << std::endl;
+#endif // GAsearch
 
+#ifdef Sweepingsearch
 	// sweep the parameter
-	//std::vector<double> coeff = { 2.24987526,	0.39806605	,2.02482809,	
-	//	0.49958895	,1.16373923,	0.63717877	,
-	//	0.66855686,	1.53769591	,0.82047087,
-	//	0	};
-	//std::vector<double> coeff = { 0,0,0, 0,0,0, 0,0,0, 1 };
-	//pt.updateParams(coeff);
+	for (float i = 0.1; i <= 0.8; i += 0.05)
+	{
+		pt.updateParams(1 / i, i, 16);
+		pt.placeRecognition();
+		std::cout << i << "\t" << pt.calculateF1score() << std::endl;
+	}
+	std::cout << "\n";
+	// 应该实际的值是一半
+	for (float i = 3; i <= 79; i += 4)
+	{
+		pt.updateParams(1 / 0.4, 0.4, i);
+		pt.placeRecognition();
+		std::cout << i << "\t" << pt.calculateF1score() << std::endl;
+	}
+	std::cout << "\n";
+	pt.updateParams(1 / 0.4, 0.4, 10);
+	for (float i = 0; i <= 0.6; i += 0.02)
+	{
+		pt.updateParams(i);
+		pt.placeRecognition();
+		float *p = new float;
+		float *r = new float;
+		std::cout << i << "\t" << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+		delete p;
+		delete r;
+	}
+#endif // Sweepingsearch
+
+#ifdef TEST
+	float *p = new float;
+	float *r = new float;
+	std::cout << "default" << std::endl;
+	pt.placeRecognition();
+	generateVideo(pt.getMatchingResults());
+	std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	std::cout << pt.calculateErr() << std::endl;
+	std::cout << "-----" << std::endl;
+
+	//std::cout << "lambda=1" << std::endl;
+	//std::vector<double> coeff3(8, 1);
+	//pt.updateParams(coeff3);
+	//pt.updateParams(0.16 * 9 / 10);
 	//pt.placeRecognition();
-	//pt.printMatchingResults();
-	//std::cout << pt.calculateF1score() << std::endl;
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
 	//std::cout << pt.calculateErr() << std::endl;
-	//for (float i = 0.1; i <= 0.8; i+=0.05)
-	//{
-	//	pt.updateParams(1/i, i, 31);
-	//	pt.placeRecognition();
-	//	std::cout << i<<"\t"<<pt.calculateF1score() << std::endl;
-	//}
-	//std::cout << "\n";
-	//for (float i = 3; i <= 151; i += 4)
-	//{
-	//	pt.updateParams(2.5, 0.4, i);
-	//	pt.placeRecognition();
-	//	std::cout << i << "\t" << pt.calculateF1score() << std::endl;
-	//}
-	//for (float i = 0; i <= 0.2; i += 0.01)
-	//{
-	//	pt.updateParams(i);
-	//	pt.placeRecognition();
-	//	std::cout << i << "\t" << pt.calculateF1score() << std::endl;
-	//}
+	//std::cout << "-----" << std::endl;
+
+	//std::cout << "without GoogLeNet" << std::endl;
+	//std::vector<double> coeff = 
+	//{ 1.24517777,	1.685089537,
+	//	1.578978596,	1.091489515,	0.987401397,
+	//	0.526293315,	0.623399388,	0.840100646,
+	//	1.422069836 };
+	//pt.updateParams(coeff);
+	//pt.updateParams(std::vector<double>(), 8, 0);
+	//pt.updateParams(0.16 * 8.577930164	/ 10);
+	//pt.placeRecognition();
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//std::cout <<"-----" << std::endl;
+	////
+	//std::cout << "without GIST" << std::endl;
+	//pt.updateParams(coeff);
+	//pt.updateParams(std::vector<double>(), 3, 0);
+	//pt.updateParams(std::vector<double>(), 4, 0);
+	//pt.updateParams(std::vector<double>(), 2, 0);
+	//pt.updateParams(0.16 * 6.342130492	/ 10);
+	//pt.placeRecognition();
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//std::cout << "-----" << std::endl;
+
+	//std::cout << "without LDB" << std::endl;
+	//pt.updateParams(coeff);
+	//pt.updateParams(std::vector<double>(), 6, 0);
+	//pt.updateParams(std::vector<double>(), 7, 0);
+	//pt.updateParams(std::vector<double>(), 5, 0);
+	//pt.updateParams(0.16 * 8.010206651	/ 10);
+	//pt.placeRecognition();
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//std::cout << "-----" << std::endl;
+
+	//std::cout << "without BoW" << std::endl;
+	//pt.updateParams(coeff);
+	//pt.updateParams(std::vector<double>(), 0, 0);
+	//pt.updateParams(std::vector<double>(), 1, 0);
+	//pt.updateParams(0.16 * 7.069732693	/ 10);
+	//pt.placeRecognition();
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//std::cout << "-----" << std::endl;
+
+	delete p;
+	delete r;
+#endif
+
 
 }
 
@@ -345,33 +428,33 @@ bool VisualLocalization::showDistanceMatrix()
 	{
 		getDistanceMap(CSDistance, "CS");
 	}
-	if (!LDBDistance_RGB.empty())
+	if (!LDBDistance[0].empty())
 	{
-		getDistanceMap(LDBDistance_RGB, "LDB");
+		getDistanceMap(LDBDistance[0], "LDB_RGB");
 	}
-	if (!LDBDistance_D.empty())
+	if (!LDBDistance[1].empty())
 	{
-		getDistanceMap(LDBDistance_D, "LDB");
+		getDistanceMap(LDBDistance[1], "LDB_D");
 	}
-	if (!LDBDistance_IR.empty())
+	if (!LDBDistance[2].empty())
 	{
-		getDistanceMap(LDBDistance_IR, "LDB");
+		getDistanceMap(LDBDistance[2], "LDB_IR");
 	}
 	if (!GPSDistance.empty())
 	{
 		getDistanceMap(GPSDistance, "GPS");
 	}
-	if (!GISTDistance_RGB.empty())
+	if (!GISTDistance[0].empty())
 	{
-		getDistanceMap(GISTDistance_RGB, "GIST");
+		getDistanceMap(GISTDistance[0], "GIST_RGB");
 	}
-	if (!GISTDistance_D.empty())
+	if (!GISTDistance[1].empty())
 	{
-		getDistanceMap(GISTDistance_D, "GIST");
+		getDistanceMap(GISTDistance[1], "GIST_D");
 	}
-	if (!GISTDistance_IR.empty())
+	if (!GISTDistance[2].empty())
 	{
-		getDistanceMap(GISTDistance_IR, "GIST");
+		getDistanceMap(GISTDistance[2], "GIST_IR");
 	}
 	cv::waitKey(1);
 	return true;
@@ -438,36 +521,45 @@ bool VisualLocalization::getEnhancedDistanceMatrix(int winSize)
 	return true;
 }
 
-int VisualLocalization::chooseGPSDistance(double rangeTh, std::vector<std::pair<double, int>>& xGPSDistance)
+// 返回时间戳格式为 yyyy-mm-dd_hh-mm-ss
+std::string getTimeStamp()
 {
-	// 可以替换成堆排序，可降低时间复杂度到nLogK?
-	std::sort(xGPSDistance.begin(), xGPSDistance.end(), cmp);
-	int GPSrear = 0;
-	for (size_t i = 0; i < xGPSDistance.size(); i++)
+	std::time_t timep = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());	
+	struct tm *p = std::localtime(&timep); /*转换为struct tm结构的当地时间*/
+
+	stringstream timeStampStream;
+	timeStampStream << 1900 + p->tm_year << setw(2) << setfill('0') << 1 + p->tm_mon << setw(2) << setfill('0') << p->tm_mday << "_";
+	timeStampStream << p->tm_hour << "-" << p->tm_min << "-" << p->tm_sec;
+	return timeStampStream.str();
+}
+
+bool VisualLocalization::generateVideo(std::vector<int> matchingResults, std::string path)
+{
+	if (path.empty())
 	{
-		if (xGPSDistance[i].first > rangeTh)
-		{
-			GPSrear = i;
-			break;
-		}
+		path = getTimeStamp()+".avi";
 	}
-	return max(GPSrear,30);
-	//return GPSrear;
-}
-
-bool cmp(const std::pair<double, int>& a, const std::pair<double, int>& b)
-{
-	return a.first < b.first;
-}
-
-bool cmpPairNum(const std::pair<double, int>& a, const std::pair<double, int>& b)
-{
-	return a.first > b.first;
-}
-
-bool cmpSec(const std::pair<int, int>& a, const std::pair<int, int>& b)
-{
-	return a.second < b.second;
+	cv::VideoWriter writer(path, cv::VideoWriter::fourcc('F', 'L', 'V', '1'), 1.0, cv::Size(320, 240 * 2));
+	if (!writer.isOpened())
+	{
+		writer.release();
+		return false;
+	}
+	for (size_t i = 0; i < matchingResults.size(); i++)
+	{
+		cv::Mat query_database = cv::imread(descriptorquery->picFiles.getColorImgPath(i));
+		if (matchingResults[i]!=-1)
+		{
+			query_database.push_back(cv::imread(descriptorbase->picFiles.getColorImgPath(matchingResults[i])));
+		}
+		else
+		{
+			query_database.push_back(cv::Mat(cv::Size(320, 240), CV_8UC3, cv::Scalar(0, 0, 0)));
+		}
+		writer << query_database;
+	}
+	writer.release();
+	return true;
 }
 
 /**

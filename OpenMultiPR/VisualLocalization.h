@@ -17,10 +17,10 @@ public:
 	bool getEnhancedDistanceMatrix(int winSize);
 	bool getGlobalSearch(int channelIdx);
 	bool getGlobalSearch();
+
+	bool generateVideo(std::vector<int> matchingResults, std::string path="");
 	
 private:
-	//bool useDepth, useIR, useRGBDIR, useRGBIR; //应该是不用的，已经在DesciptorGroup中读取过
-
 	// 训练集数据(保存记录的路径)
 	Descriptors* descriptorbase;
 
@@ -35,12 +35,9 @@ private:
 	bool withGPS;
 	std::string descriptor;
 
-	int chooseGPSDistance(double rangeTh, std::vector<std::pair<double, int>>& xDistance);
-
-
-	// get a distance matrix, which is as follows
-	cv::Mat GISTDistance_RGB, GISTDistance_D, GISTDistance_IR;
-	cv::Mat LDBDistance_RGB, LDBDistance_D, LDBDistance_IR;
+	/// get a distance matrix, which is as follows:	
+	cv::Mat GISTDistance[3];	//GISTDistance_RGB, GISTDistance_D, GISTDistance_IR;
+	cv::Mat LDBDistance[3];	//LDBDistance_RGB, LDBDistance_D, LDBDistance_IR;
 	cv::Mat GPSDistance;
 	cv::Mat /*GPSMask,*/ GPSMask_uchar;
 	cv::Mat CSDistance;
@@ -52,9 +49,11 @@ private:
 	//  V
 	//  query images
 	cv::Mat enhanceMatrix(const cv::Mat& distanceMat, int winSize);
+	int matRow, matCol;
+
 
 	// 最佳匹配结果
-	std::vector<int> BoWGlobalBest_RGB, BoWGlobalBest_D, BoWGlobalBest_IR;
+	std::vector<int> BoWGlobalBest_RGB, /*BoWGlobalBest_D,*/ BoWGlobalBest_IR;
 	std::vector<int> GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR;
 	std::vector<int> LDBGlobalBest_RGB, LDBGlobalBest_D, LDBGlobalBest_IR;
 	std::vector<int> GPSGlobalBest;
@@ -62,11 +61,6 @@ private:
 
 	GroundTruth ground;
 };
-
-// 对pair进行排序的比较函数
-bool cmp(const std::pair<double, int>& a, const std::pair<double, int>& b);
-bool cmpPairNum(const std::pair<double, int>& a, const std::pair<double, int>& b);
-bool cmpSec(const std::pair<int, int>& a, const std::pair<int, int>& b);
 
 // 计算二进制描述符的汉明距离
 int hamming_matching(cv::Mat desc1, cv::Mat desc2);

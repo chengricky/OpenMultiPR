@@ -1,3 +1,4 @@
+// get rid of bit-selection
 /*
 	LDB.cpp
 	Created on: Apr 10, 2013
@@ -52,15 +53,18 @@ vector<int> randomSequence_;
 /** the end of a row in a circular patch */
 std::vector<int> u_max_;
 
-#define TRAINING
+//#define TRAINING
+//#define SELECT
 
 int n_levels = 0;
 
 #define total_bits 1386
 #ifdef TRAINING
 #define selected_bits 1384
-#else
+#elif SELECT
 #define selected_bits 256
+#else
+#define selected_bits 1384
 #endif
 
 #define LEVEL5
@@ -271,6 +275,10 @@ static void computeLdbDescriptor(const cv::KeyPoint& kpt, const cv::Mat& img, co
 #ifdef TRAINING
 	for(int i = 0; i < randSequence.size(); i++)
 		bit_pattern_256_[i] = randSequence[i];
+#elif SELECT
+#else
+	for (int i = 0; i < randSequence.size(); i++)
+		bit_pattern_256_[i] = i;
 #endif
 
 	// Compute the pointer to the center of the feature
