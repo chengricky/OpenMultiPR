@@ -70,12 +70,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>Descriptors\GIST\include;$(FFTW_DIR)\include;$(KL1p_DIR)\libs\Armadillo\include;$(KL1p_DIR)\include;$(DBoW3_DIR)\include;$(OpenCV_DIR)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(FFTW_DIR)\lib;$(KL1p_DIR)\bin\win;$(DBoW3_DIR)\lib;$(OpenCV_DIR)\x64\vc15\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>Descriptors\GIST\include;$(FFTW_DIR)\include;$(KL1p_DIR)\libs\Armadillo\include;$(KL1p_DIR)\include;$(DBoW3_DIR)\include;$(OpenCV4_DIR)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(FFTW_DIR)\lib;$(KL1p_DIR)\bin\win;$(DBoW3_DIR)\lib;$(OpenCV4_DIR)\x64\vc15\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>Descriptors\GIST\include;$(FFTW_DIR)\include;$(KL1p_DIR)\libs\Armadillo\include;$(KL1p_DIR)\include;$(DBoW3_DIR)\include;$(OpenCV_DIR)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(FFTW_DIR)\lib;$(KL1p_DIR)\bin\win;$(DBoW3_DIR)\lib;$(OpenCV_DIR)\x64\vc15\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>Descriptors\GIST\include;$(FFTW_DIR)\include;$(KL1p_DIR)\libs\Armadillo\include;$(KL1p_DIR)\include;$(DBoW3_DIR)\include;$(OpenCV4_DIR)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(FFTW_DIR)\lib;$(KL1p_DIR)\bin\win;$(DBoW3_DIR)\lib;$(OpenCV4_DIR)\x64\vc15\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

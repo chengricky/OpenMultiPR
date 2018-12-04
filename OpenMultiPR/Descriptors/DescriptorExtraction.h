@@ -29,11 +29,13 @@ public:
 	std::vector<cv::KeyPoint> getKeypoints() { return keypoints; };
 };
 
+#ifdef USE_CONTRIB
 class SURFExtractor : public OCVExtractor
 {	
 public:
 	SURFExtractor(int imgIdx);
 };
+#endif
 
 class ORBExtractor : public OCVExtractor
 {
