@@ -76,10 +76,12 @@ ORBExtractor::ORBExtractor(int imgIdx): OCVExtractor(imgIdx)
 	//detector = cv::ORB::create(500, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); 	// BoW使用默认配置获得ORB特征
 }
 
+#ifdef USE_CONTRIB
 SURFExtractor::SURFExtractor(int imgIdx) : OCVExtractor(imgIdx)
 {
 	detector = cv::xfeatures2d::SURF::create();
 }
+#endif
 
 bool OCVExtractor::extract(std::vector<cv::Mat> img)
 {
