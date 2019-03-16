@@ -30,15 +30,14 @@ public:
 	std::string pathRec;
 	std::string pathTest;
 	std::string codeBook;
+	bool fileType; // true=feature, false=image
+	int interval;
 
 	//彩色图保持为彩色图(1)或转换为灰度图(0)
 	bool isColor; 
 	bool useColor;
 	bool useIR;
 	bool useDepth;
-	//bool useRGBDIR;
-	//bool useRGBIR;
-	//bool usePaperConfig;
 	bool withGPS;
 	
 	// Descriptor Type

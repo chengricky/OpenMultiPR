@@ -1,6 +1,7 @@
 #include "DescriptorExtraction.h"
 #include "CS/CSOperation.h"
 #include "GIST\include\gist.h"
+#include "../Tools/Timer.h"
 
 GoogLeNetExtractor::GoogLeNetExtractor(int imgIdx) : ImgDescriptorExtractor(imgIdx)
 {
@@ -50,6 +51,10 @@ static cv::Mat featureReshape(std::vector<cv::Mat>& layer1_Mat)
 
 bool GoogLeNetExtractor::extract(std::vector<cv::Mat> img)
 {
+	//std::cout << "\nGoogleNet Time consumed: ";
+	//Timer timer;
+	//timer.start();
+
 	result = cv::Mat();
 	cv::Mat imgResize;
 	cv::resize(img[imgIdx], imgResize, cv::Size(224, 224));
@@ -67,6 +72,9 @@ bool GoogLeNetExtractor::extract(std::vector<cv::Mat> img)
 		result.push_back(feature_GoogLeNet.at<float>(0, id));
 	}
 	result = result.reshape(1, 1);
+	
+	//timer.stop();
+	//timer.print_elapsed_time(TimeExt::MSec);
 	return true;
 }
 
@@ -95,10 +103,17 @@ GIST_PARAMS({ useColor, imgSize.width, imgSize.height, 4, 3, { 8, 8, 8 } }) {}
 
 bool GISTExtractor::extract(std::vector<cv::Mat> todoImages)
 {
+	//std::cout << "\nGIST Time consumed: ";
+	//Timer timer;
+	//timer.start();
+
 	cls::GIST gist_ext(GIST_PARAMS);
 	std::vector<float> result_vec;
 	gist_ext.extract(todoImages[imgIdx], result_vec, isNormalize);//输入彩色图，内部会自动根据DEFAULT_PARAMS需要，转换灰度	
 	cv::Mat(result_vec).reshape(1, 1).copyTo(result);
+
+	//timer.stop();
+	//timer.print_elapsed_time(TimeExt::MSec);
 	return true;
 }
 

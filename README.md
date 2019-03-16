@@ -1,4 +1,6 @@
 # Open Multimodal Place Recognition
+![avatar](/GUI.png)
+
 If you are using this code in your research, please cite the papers:\
 OpenMPR: Recognize Places Using Multimodal Images for People with Visual Impairments
 

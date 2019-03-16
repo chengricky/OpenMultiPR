@@ -8,14 +8,16 @@ class PicGNSSFile : public FileInterface
 public:
 	PicGNSSFile() {};
 	PicGNSSFile(std::string filepath, int mode, bool ifGNSS, std::string fileKeyWord);
-	void init(std::string filepath, int mode, bool ifGNSS, std::string fileKeyWord);
+	void init(std::string filepath, int mode, bool ifGNSS, std::string fileKeyWord, int interval=1);
 	void init(std::string filepath, int mode, bool ifGNSS) {};
 	bool doMain();
+	bool doMainFeatureFile();
 	cv::Size getImgSize();
 
 	cv::Mat colorImg;
 	cv::Mat depthImg;
 	cv::Mat IRImg;
+	cv::Mat netVLAD;
 	double latitudeValue;
 	double longitudeValue;
 	bool readVideo() { return false; }

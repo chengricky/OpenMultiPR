@@ -21,12 +21,28 @@ VisualLocalization::VisualLocalization(GlobalConfig& config)
 	{
 		throw invalid_argument("Configuration is invalid!");
 	}
-	descriptorbase = new Descriptors(config, true);
-	std::cout << "Database Images is read." << std::endl;
-	descriptorquery = new Descriptors(config, false);
-	std::cout << "Query Images is read." << std::endl;
-	matRow = descriptorquery->getVolume();
-	matCol = descriptorbase->getVolume();
+	if (!config.fileType)//image
+	{
+		descriptorbase = new Descriptors(config, true);
+		std::cout << "Database Images were read." << std::endl;
+		descriptorquery = new Descriptors(config, false);
+		std::cout << "Query Images were read." << std::endl;
+		matRow = descriptorquery->getVolume();
+		matCol = descriptorbase->getVolume();
+		featurebase = nullptr;
+		featurequery = nullptr;
+	}
+	else//feature
+	{
+		featurebase = new DescriptorFromFile(config, true);
+		std::cout << "Database Features were read." << std::endl;
+		featurequery = new DescriptorFromFile(config, false);
+		std::cout << "Query Features were read." << std::endl;
+		matRow = featurequery->getVolume();
+		matCol = featurebase->getVolume();
+		descriptorbase = nullptr;
+		descriptorquery = nullptr;
+	}
 
 	this->codeBook = config.codeBook;
 	cv::destroyAllWindows();
@@ -43,6 +59,14 @@ VisualLocalization::~VisualLocalization()
 	if (descriptorquery !=nullptr)
 	{
 		delete descriptorquery;
+	}
+	if (featurebase != nullptr)
+	{
+		delete featurebase;
+	}
+	if (featurequery != nullptr)
+	{
+		delete featurequery;
 	}
 };
 
@@ -157,9 +181,6 @@ bool VisualLocalization::getGlobalSearch(int channelIdx)
 	}
 	else
 	{
-#ifdef _DEBUG
-		(*BoWGlobalBest) = cv::Mat();
-#else
 		// load the vocabulary from disk
 		DBoW3::Vocabulary voc(codeBook);
 		DBoW3::Database ORBdb;
@@ -193,7 +214,6 @@ bool VisualLocalization::getGlobalSearch(int channelIdx)
 				}
 			}
 		}
-#endif // DEBUG
 	}
 
 	//cv::Mat LDBdistanceMat, GISTdistanceMat;
@@ -262,6 +282,12 @@ bool VisualLocalization::getGlobalSearch()//GPS global best
 
 void VisualLocalization::getBestMatch()
 {
+
+	if (featurequery!=nullptr)
+	{
+		getBestMatch_FeatureFile();
+		return;
+	}
 	// generate distance matric for gist \ ldb \ cs and gps && BoW 
 	// get global best idx
 	getDistanceMatrix((float)15);
@@ -341,7 +367,216 @@ void VisualLocalization::getBestMatch()
 	float *r = new float;
 	std::cout << "default" << std::endl;
 	pt.placeRecognition();
-	generateVideo(pt.getMatchingResults());
+	//generateVideo(pt.getMatchingResults());
+	std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	std::cout << pt.calculateErr() << std::endl;
+	std::cout << "-----" << std::endl;
+
+	//std::cout << "lambda=1" << std::endl;
+	//std::vector<double> coeff3(8, 1);
+	//pt.updateParams(coeff3);
+	//pt.updateParams(0.16 * 9 / 10);
+	//pt.placeRecognition();
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//std::cout << "-----" << std::endl;
+
+	//std::cout << "without GoogLeNet" << std::endl;
+	//std::vector<double> coeff = 
+	//{ 1.24517777,	1.685089537,
+	//	1.578978596,	1.091489515,	0.987401397,
+	//	0.526293315,	0.623399388,	0.840100646,
+	//	1.422069836 };
+	//pt.updateParams(coeff);
+	//pt.updateParams(std::vector<double>(), 8, 0);
+	//pt.updateParams(0.16 * 8.577930164	/ 10);
+	//pt.placeRecognition();
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//std::cout <<"-----" << std::endl;
+	////
+	//std::cout << "without GIST" << std::endl;
+	//pt.updateParams(coeff);
+	//pt.updateParams(std::vector<double>(), 3, 0);
+	//pt.updateParams(std::vector<double>(), 4, 0);
+	//pt.updateParams(std::vector<double>(), 2, 0);
+	//pt.updateParams(0.16 * 6.342130492	/ 10);
+	//pt.placeRecognition();
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//std::cout << "-----" << std::endl;
+
+	//std::cout << "without LDB" << std::endl;
+	//pt.updateParams(coeff);
+	//pt.updateParams(std::vector<double>(), 6, 0);
+	//pt.updateParams(std::vector<double>(), 7, 0);
+	//pt.updateParams(std::vector<double>(), 5, 0);
+	//pt.updateParams(0.16 * 8.010206651	/ 10);
+	//pt.placeRecognition();
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//std::cout << "-----" << std::endl;
+
+	//std::cout << "without BoW" << std::endl;
+	//pt.updateParams(coeff);
+	//pt.updateParams(std::vector<double>(), 0, 0);
+	//pt.updateParams(std::vector<double>(), 1, 0);
+	//pt.updateParams(0.16 * 7.069732693	/ 10);
+	//pt.placeRecognition();
+	////pt.printMatchingResults();
+	//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	//std::cout << pt.calculateErr() << std::endl;
+	//std::cout << "-----" << std::endl;
+
+	delete p;
+	delete r;
+#endif
+
+
+}
+
+void VisualLocalization::getBestMatch_FeatureFile()
+{
+	// generate distance matric for netVLAD
+	// netVLAD
+	auto Query = featurequery->netVLADs;
+	auto Ref = featurebase->netVLADs;
+	if (Query.empty() || Ref.empty())
+	{
+		netVLAD_Distance = cv::Mat();
+	}
+	else
+	{
+		netVLAD_Distance = cv::Mat(matRow, matCol, CV_32FC1);
+		for (size_t i = 0; i < matRow; i++)
+			for (size_t j = 0; j < matCol; j++)
+				netVLAD_Distance.at<float>(i, j) = cv::norm(Query.row(i), Ref.row(j), cv::NORM_L2);
+	}
+	// GPS
+	auto GPSQuery = featurequery->GPS;
+	auto GPSRef = featurebase->GPS;
+	if (GPSQuery.empty() || GPSRef.empty())
+	{
+		GPSDistance = cv::Mat();
+		GPSMask_uchar = cv::Mat();
+	}
+	else
+	{
+		GPSDistance = cv::Mat(matRow, matCol, CV_32FC1);
+		for (size_t i = 0; i < matRow; i++)
+			for (size_t j = 0; j < matCol; j++)
+				GPSDistance.at<float>(i, j) = GNSSdistance(GPSQuery.at<float>(i, 1), GPSQuery.at<float>(i, 0), GPSRef.at<float>(j, 1), GPSRef.at<float>(j, 0));
+		cv::Mat GPSuchar;
+		GPSDistance.convertTo(GPSuchar, CV_8U);
+		cv::threshold(GPSuchar, GPSMask_uchar, (float)15, 255, cv::THRESH_BINARY);
+	}
+	// get global best idx
+#ifdef GPS_TEST
+	/// only GPS localization
+	cv::Mat GPSdistanceMat = GPSDistance;
+	GPSdistanceMat.setTo(FLT_MAX, GPSMask_uchar);
+	for (size_t i = 0; i < matRow; i++)//query
+	{
+		//When minIdx is not NULL, it must have at least 2 elements (as well as maxIdx), even if src is a single-row or single-column matrix.
+		//In OpenCV (following MATLAB) each array has at least 2 dimensions, i.e. single-column matrix is Mx1 matrix (and therefore minIdx/maxIdx will be (i1,0)/(i2,0)) 
+		//and single-row matrix is 1xN matrix (and therefore minIdx/maxIdx will be (0,j1)/(0,j2)).
+		int* minPos = new int[2];
+		cv::minMaxIdx(GPSdistanceMat.row(i), nullptr, nullptr, minPos, nullptr);	//可否改成top-k		?
+		GPSGlobalBest.push_back(minPos[1]);
+		delete minPos;
+	}
+#endif // GPS_TEST
+	/// netVLAD 
+	cv::Mat netVLADdistanceMat = netVLAD_Distance;
+	netVLADdistanceMat.setTo(FLT_MAX, GPSMask_uchar);
+	for (size_t i = 0; i < matRow; i++)//query
+	{
+		//When minIdx is not NULL, it must have at least 2 elements (as well as maxIdx), even if src is a single-row or single-column matrix.
+		//In OpenCV (following MATLAB) each array has at least 2 dimensions, i.e. single-column matrix is Mx1 matrix (and therefore minIdx/maxIdx will be (i1,0)/(i2,0)) 
+		//and single-row matrix is 1xN matrix (and therefore minIdx/maxIdx will be (0,j1)/(0,j2)).
+		int* minPos = new int[2];
+		cv::minMaxIdx(netVLADdistanceMat.row(i), nullptr, nullptr, minPos, nullptr);	//可否改成top-k		?
+		netVLADglobalResult.push_back(minPos[1]);
+		delete minPos;
+	}
+
+	cv::Size matSize(matCol, matRow);
+
+#ifdef GPS_TEST
+	Parameter2F1 pt(ground.gt, GGglobalResult, GPSGlobalBest, BoWGlobalBest_D, BoWGlobalBest_IR, GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR,
+		LDBGlobalBest_RGB, LDBGlobalBest_D, LDBGlobalBest_IR, matSize);
+	float *p = new float;
+	float *r = new float;
+	std::cout << "GPS_TEST" << std::endl;
+	std::vector<double> coeff4 = { 1,0,0, 0,0,0, 0,0,0, 0 };
+	pt.updateParams(coeff4);
+	pt.updateParams(0);
+	pt.updateParams(1, 1, 1);
+	pt.placeRecognition();
+	//pt.printMatchingResults();
+	std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+	std::cout << pt.calculateErr() << std::endl;
+	std::cout << "-----" << std::endl;
+#else
+	Parameter2F1 pt(ground.gt, netVLADglobalResult, std::vector<int>(), std::vector<int>(), std::vector<int>(), std::vector<int>(), std::vector<int>(),
+		std::vector<int>(), std::vector<int>(), std::vector<int>(), matSize);
+#endif // GPS_TEST
+
+
+#ifdef GAsearch
+	//// use OpenGA to optimize coefficents
+	std::vector<double> coeff;
+	pt.prepare4MultimodalCoefficients();
+	optimizeMultimodalCoefficients(&pt, coeff);
+	pt.updateParams(coeff);
+	////// calculate score matrix for single descriptor
+	pt.placeRecognition();
+	//pt.printMatchingResults();
+	std::cout << pt.calculateF1score() << std::endl;
+#endif // GAsearch
+
+#ifdef Sweepingsearch
+	// sweep the parameter
+	for (float i = 0.1; i <= 0.8; i += 0.05)
+	{
+		pt.updateParams(1 / i, i, 16);
+		pt.placeRecognition();
+		std::cout << i << "\t" << pt.calculateF1score() << std::endl;
+	}
+	std::cout << "\n";
+	// 应该实际的值是一半
+	for (float i = 3; i <= 79; i += 4)
+	{
+		pt.updateParams(1 / 0.4, 0.4, i);
+		pt.placeRecognition();
+		std::cout << i << "\t" << pt.calculateF1score() << std::endl;
+	}
+	std::cout << "\n";
+	pt.updateParams(1 / 0.4, 0.4, 10);
+	for (float i = 0; i <= 0.6; i += 0.02)
+	{
+		pt.updateParams(i);
+		pt.placeRecognition();
+		float *p = new float;
+		float *r = new float;
+		std::cout << i << "\t" << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+		delete p;
+		delete r;
+	}
+#endif // Sweepingsearch
+
+#ifdef TEST
+	float *p = new float;
+	float *r = new float;
+	std::cout << "default" << std::endl;
+	std::vector<double> coeff3(9, 0);
+	pt.updateParams(std::vector<double>(), 8, 1);
+	pt.updateParams(0);
+	pt.placeRecognition();
 	std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
 	std::cout << pt.calculateErr() << std::endl;
 	std::cout << "-----" << std::endl;

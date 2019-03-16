@@ -8,6 +8,8 @@ places_googlenet/
 *.user
 *.userosscache
 *.sln.docstates
+*.dbow3
+*.avi
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

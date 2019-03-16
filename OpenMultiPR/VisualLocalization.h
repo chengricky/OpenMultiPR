@@ -1,7 +1,7 @@
 #pragma once
-
+#include "Descriptors\DesriptorFromFile.h"
 #include "Descriptors\descriptorgroup.h"
-#include "Descriptors/BoW/BoW.h"
+#include "Descriptors/BoW/DBoW3.h"
 #include "FileInterface/GroundTruth.h"
 
 class VisualLocalization
@@ -11,6 +11,7 @@ public:
 	virtual ~VisualLocalization();
 
 	void getBestMatch();
+	void getBestMatch_FeatureFile();
 	bool showDistanceMatrix();
 	bool getDistanceMatrix(int channelIdx);
 	bool getDistanceMatrix(float GNSS=30);
@@ -23,7 +24,7 @@ public:
 private:
 	// 训练集数据(保存记录的路径)
 	Descriptors* descriptorbase;
-
+	DescriptorFromFile* featurebase;
 	std::vector<std::vector<std::pair<double, int>>> gist;
 	std::vector<std::vector<std::pair<double, int>>> ldb;
 	std::vector<std::vector<std::pair<double, int>>> gps;
@@ -31,6 +32,7 @@ private:
 
 	// 测试集数据
 	Descriptors* descriptorquery;
+	DescriptorFromFile* featurequery;
 	std::vector<bool> keyGT, keyPredict, keyGPS;
 	bool withGPS;
 	std::string descriptor;
@@ -39,9 +41,10 @@ private:
 	cv::Mat GISTDistance[3];	//GISTDistance_RGB, GISTDistance_D, GISTDistance_IR;
 	cv::Mat LDBDistance[3];	//LDBDistance_RGB, LDBDistance_D, LDBDistance_IR;
 	cv::Mat GPSDistance;
-	cv::Mat /*GPSMask,*/ GPSMask_uchar;
+	cv::Mat GPSMask_uchar;
 	cv::Mat CSDistance;
 	cv::Mat GGDistance;
+	cv::Mat netVLAD_Distance;
 	std::string codeBook;
 	//   ----> database
 	//  |
@@ -53,11 +56,12 @@ private:
 
 
 	// 最佳匹配结果
-	std::vector<int> BoWGlobalBest_RGB, /*BoWGlobalBest_D,*/ BoWGlobalBest_IR;
+	std::vector<int> BoWGlobalBest_RGB,  BoWGlobalBest_IR;
 	std::vector<int> GISTGlobalBest_RGB, GISTGlobalBest_D, GISTGlobalBest_IR;
 	std::vector<int> LDBGlobalBest_RGB, LDBGlobalBest_D, LDBGlobalBest_IR;
 	std::vector<int> GPSGlobalBest;
 	std::vector<int> GGglobalResult;
+	std::vector<int> netVLADglobalResult;
 
 	GroundTruth ground;
 };

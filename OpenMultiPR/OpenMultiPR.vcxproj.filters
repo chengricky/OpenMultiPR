@@ -66,9 +66,6 @@
     <ClInclude Include="Descriptors\LDB\Ldb.h">
       <Filter>Descriptors\LDB</Filter>
     </ClInclude>
-    <ClInclude Include="Descriptors\BoW\BoW.h">
-      <Filter>Descriptors\BoW</Filter>
-    </ClInclude>
     <ClInclude Include="Descriptors\DescriptorGroup.h">
       <Filter>Descriptors</Filter>
     </ClInclude>
@@ -86,6 +83,42 @@
     </ClInclude>
     <ClInclude Include="ParameterTuning.h">
       <Filter>Source&amp;Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\DesriptorFromFile.h">
+      <Filter>Descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\BowVector.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\Database.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\DBoW3.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\DescManip.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\exports.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\FeatureVector.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\QueryResults.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\quicklz.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\ScoringObject.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\timers.h">
+      <Filter>Descriptors\BoW</Filter>
+    </ClInclude>
+    <ClInclude Include="Descriptors\BoW\Vocabulary.h">
+      <Filter>Descriptors\BoW</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -142,6 +175,33 @@
     </ClCompile>
     <ClCompile Include="ParameterTuning.cpp">
       <Filter>Source&amp;Header</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\DescriptorFromFile.cpp">
+      <Filter>Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\BoW\BowVector.cpp">
+      <Filter>Descriptors\BoW</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\BoW\Database.cpp">
+      <Filter>Descriptors\BoW</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\BoW\DescManip.cpp">
+      <Filter>Descriptors\BoW</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\BoW\FeatureVector.cpp">
+      <Filter>Descriptors\BoW</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\BoW\QueryResults.cpp">
+      <Filter>Descriptors\BoW</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\BoW\quicklz.c">
+      <Filter>Descriptors\BoW</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\BoW\ScoringObject.cpp">
+      <Filter>Descriptors\BoW</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors\BoW\Vocabulary.cpp">
+      <Filter>Descriptors\BoW</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

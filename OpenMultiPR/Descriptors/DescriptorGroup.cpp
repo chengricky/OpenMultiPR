@@ -15,26 +15,24 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 	// 对图像文件列表和GNSS、是否关键点数据进行赋值
 	if (config.useColor&&!config.useDepth&&!config.useIR)
 	{
-		picFiles.init(picPath, PicGNSSFile::RGB, config.withGPS, "color");
+		picFiles.init(picPath, PicGNSSFile::RGB, config.withGPS, "color" );
 	}
 	else if (config.useColor && config.useDepth && !config.useIR)
 	{
-		picFiles.init(picPath, PicGNSSFile::RGBD, config.withGPS, "color");
+		picFiles.init(picPath, PicGNSSFile::RGBD, config.withGPS, "color" );
 	}
 	else if (config.useColor && config.useDepth && config.useIR)
 	{
-		picFiles.init(picPath, PicGNSSFile::RGBDIR, config.withGPS, "color");
+		picFiles.init(picPath, PicGNSSFile::RGBDIR, config.withGPS, "color" );
 	}
 
 	assert(config.useColor);
+
+
 	// set descriptor extractors
 	if (config.useBoW == true)
 	{
 		extraction.add(new  ORBExtractor(0));
-		//if (config.useDepth)
-		//{
-		//	extraction.add(new ORBExtractor(1));
-		//}
 		if (config.useIR)
 		{
 			extraction.add(new ORBExtractor(2));
@@ -83,12 +81,11 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 		std::vector<cv::Mat> todoImages = getAllImage(picFiles, config.dImgSize);
 
 		// save the descriptor of GIST and LDB
+		std::cout << "Time consumed: ";
 		Timer timer;
 		timer.start();
 
 		extraction.run(todoImages);
-		//std::vector<cv::Mat> xLDBChannel;
-		//std::vector<cv::Mat> xGISTChannel;
 		std::vector<cv::Mat> xORBChannel;
 		for (size_t i = 0; i < extraction.getSize(); i++)
 		{
@@ -100,8 +97,6 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 			else if (typeid(*pDescriptor) == typeid(LDBExtractor))
 			{
 				LDB[pDescriptor->getImgIdx()].push_back(pDescriptor->getResult());
-				//std::cout << pLDB->getResult() << std::endl;
-				//system("pause");
 			}
 			else if (typeid(*pDescriptor) == typeid(ORBExtractor))
 			{
@@ -118,7 +113,6 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 		}
 
 		timer.stop();
-		std::cout << "Time consumed: ";
 		timer.print_elapsed_time(TimeExt::MSec);
 
 		/*CS*/
@@ -129,15 +123,9 @@ Descriptors::Descriptors(GlobalConfig& config, bool isRefImage)
 			ORB_RGB.push_back(xORBChannel[0]);
 			if (xORBChannel.size() >= 2)
 			{
-				ORB_IR.push_back(xORBChannel[1]);
-/*				if (xORBChannel.size() >= 3)
-				{
-					ORB_IR.push_back(xORBChannel[2]);
-				}	*/			
+				ORB_IR.push_back(xORBChannel[1]);	
 			}
 		}
-
-		//cv::waitKey(1);
 	}
 
 	extraction.release();

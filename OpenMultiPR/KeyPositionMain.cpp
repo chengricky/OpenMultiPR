@@ -5,7 +5,8 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-#include <opencv2/opencv.hpp>
+#include "Header.h"
+#include "Tools/Timer.h"
 
 
 
@@ -16,9 +17,15 @@ int main()
 	static GlobalConfig& config = GlobalConfig::instance();
 	VisualLocalization vl(config);
 
+	std::cout << "Matching Time consumed: ";
+	Timer timer;
+	timer.start();
 
 	vl.getBestMatch();
 	//vl.showDistanceMatrix();
+
+	timer.stop();
+	timer.print_elapsed_time(TimeExt::MSec);
 
 
 	cv::waitKey(0);

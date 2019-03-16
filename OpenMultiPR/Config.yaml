@@ -1,16 +1,17 @@
 %YAML:1.0
 ---
-#PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Lib\\reference\\"
-#PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Lib\\query\\"
-#PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Gate\\reference\\"
-#PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Gate\\query\\"
-PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\reference\\"
-PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\query\\"
-#PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\Gate-T3\\reference\\"
-#PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\Gate-T3\\query\\"
-BoW_CodeBook: "D:\\Dependencies\\DBoW3\\bin\\orbvoc.dbow3"
+#PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Lib\\reference"
+#PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Lib\\query"
+PathRec: "E:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Gate\\reference"
+PathTest: "E:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-Gate\\query"
+#PathRec: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\reference-netVLAD"
+#PathTest: "D:\\PreciseLocalization\\Dataset\\VLdataset_MultiModal\\T3-T3\\query-netVLAD"
+#PathRec: "D:\\2015 Highway Dataset\\Day-netVLAD-patch"
+#PathTest: "D:\\2015 Highway Dataset\\Night-netVLAD-patch"
+BoW_CodeBook: "orbvoc.dbow3"
 # read "Image"=0 or "Feature"=1 from files
 FileType: 0
+Interval: 1
 # ImgType - hybrid-RGBDIR(3), RGBIR(4), BoW-RGB,GIST-RGB,LDB-RGBDIR(5-paperConfig), RGBDIR-SS(6)
 ColorImg: 1 # color is essential for place recognition
 DepthImg: 1
@@ -25,5 +26,5 @@ LDB: 1
 # whether use color image
 Color: 1
 # other sensor
-GPS: 1
+GPS: 0
 

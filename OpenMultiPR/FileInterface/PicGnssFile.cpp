@@ -5,15 +5,17 @@ using namespace std;
 
 PicGNSSFile::PicGNSSFile(std::string filepath, int mode, bool ifGNSS, std::string fileKeyWord)
 {
-	init(filepath, mode, ifGNSS, fileKeyWord);
+	init(filepath, mode, ifGNSS, fileKeyWord );
 }
 
-void PicGNSSFile::init(std::string filepath, int mode, bool ifGNSS, std::string fileKeyWord)
+void PicGNSSFile::init(std::string filepath, int mode, bool ifGNSS, std::string fileKeyWord, int interval)
 {
 	this->mode = mode;
 	vector<string> suffix;
 	suffix.push_back("png");
 	suffix.push_back("jpg");
+	suffix.push_back("png.txt");
+	suffix.push_back("jpg.txt");
 	//文件句柄
 	intptr_t hFile = 0;
 	//文件信息
@@ -23,8 +25,15 @@ void PicGNSSFile::init(std::string filepath, int mode, bool ifGNSS, std::string 
 		string searchPath = filepath + "\\*" + fileKeyWord + "." + suffix[i];
 		if ((hFile = _findfirst(searchPath.c_str(), &fileinfo)) != -1)
 		{
+			int iii = 0;
 			do
 			{
+				if (iii%interval!=0)
+				{
+					iii++;
+					continue;
+				}
+				iii++;
 				string filename(fileinfo.name);
 				size_t pos = filename.find_first_of('c');
 				string filePrefix = filename.substr(0U, pos);
@@ -61,7 +70,7 @@ void PicGNSSFile::init(std::string filepath, int mode, bool ifGNSS, std::string 
 						IRFiles.push_back(filepath + "\\" + filePrefix + "rightIR." + suffix[i]);
 					}
 				}
-
+				
 			} while (_findnext(hFile, &fileinfo) == 0);
 			_findclose(hFile);
 		}
@@ -133,6 +142,39 @@ bool PicGNSSFile::doMain()
 		return false;
 	}
 	
+}
+
+bool PicGNSSFile::doMainFeatureFile()
+{
+	if (filePointer < fileVolume)
+	{
+		std::ifstream featureFile(colorFiles[filePointer]);
+		if (featureFile.is_open())
+		{
+			if(!netVLAD.empty())
+				netVLAD.release();
+			while (!featureFile.eof())
+			{
+				float dim;
+				featureFile >> dim;
+				netVLAD.push_back(dim);
+			}
+		}
+		netVLAD = netVLAD.reshape(1, 1);
+		if (!latitude.empty() && !longitude.empty())
+		{
+			latitudeValue = latitude[filePointer];
+			longitudeValue = longitude[filePointer];
+		}
+		filePointer++;
+		cv::waitKey(1);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
 }
 
 cv::Size PicGNSSFile::getImgSize()

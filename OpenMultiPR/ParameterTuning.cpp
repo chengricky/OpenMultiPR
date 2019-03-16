@@ -92,7 +92,7 @@ bool optimizeMultimodalCoefficients(Parameter2F1* pt, std::vector<double>& x)
 
 	std::vector<std::vector<double>> xVec;
 	std::vector<float> f1Vec;
-	for (size_t i = 0; i < 15; i++)
+	for (int i = 0; i < 15; i++)
 	{
 		GA_Type ga_obj;
 		ga_obj.problem_mode = EA::GA_MODE::SOGA;
@@ -168,8 +168,11 @@ void Parameter2F1::placeRecognition()
 	{
 		pSS[i].init((pGlobal[i]), matSize, parameters.numsequence, parameters.vmin, parameters.vmax);
 		pSS[i].coneSearch();
-		synScoreMat += parameters.lambda[i] * (pSS[i].scoreMat);
-		sum += parameters.lambda[i];
+		if (!pSS[i].scoreMat.empty())
+		{
+			synScoreMat += parameters.lambda[i] * (pSS[i].scoreMat);
+			sum += parameters.lambda[i];
+		}
 	}
 	synScoreMat = synScoreMat / sum;
 	getScoreMap( synScoreMat);
@@ -209,13 +212,16 @@ float Parameter2F1::placeRecognition4MultimodalCoefficients(const MyGenes& p)
 	float sum = 0;
 	for (size_t i = 0; i < 9; i++)
 	{
-		synScoreMat += p.x[i] * (pSS[i].scoreMat);
-		sum += p.x[i];
+		if (!pSS[i].scoreMat.empty())
+		{
+			synScoreMat += p.x[i] * (pSS[i].scoreMat);
+			sum += p.x[i];
+		}
 	}
 	synScoreMat = synScoreMat / sum;
 	getScoreMap(synScoreMat);
 	cv::waitKey(1);
-	//cv::waitKey(0);
+
 	for (size_t i = 0; i < synScoreMat.rows; i++)//query
 	{
 		double maxVal;

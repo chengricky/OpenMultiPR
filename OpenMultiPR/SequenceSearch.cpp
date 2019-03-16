@@ -23,7 +23,7 @@ void SequenceSearch::coneSearch()//±ØÐëÎªÆæÊý
 			// on-line mode
 			int min_y = std::max(0, (int)i - (numSearch - 1) );
 			int max_y = i;
-			// off-lin mode
+			// off-line mode
 			//int min_y = std::max(0, (int)i - (numSearch - 1) / 2);
 			//int max_y = std::min((int)i + (numSearch - 1) / 2, matSize.height - 1);
 			for (int k = min_y; k <= max_y; k++)//query within coneopen
