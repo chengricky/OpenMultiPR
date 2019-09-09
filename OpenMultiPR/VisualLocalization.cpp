@@ -11,9 +11,6 @@
 using namespace DBoW3;
 using namespace std;
 
-//#define GAsearch
-//#define Sweepingsearch
-
 
 VisualLocalization::VisualLocalization(GlobalConfig& config)
 { 	
@@ -280,7 +277,7 @@ void VisualLocalization::getBestMatch()
 		std::cout << pt.calculateErr() << std::endl;
 		std::cout << "-----" << std::endl;
 	}
-	else if (runningMode == 1)
+	else
 	{
 		// generate distance matric for gist \ ldb and gps && BoW 
 		// get global best idx
@@ -298,124 +295,125 @@ void VisualLocalization::getBestMatch()
 			LDBGlobalBest_RGB, LDBGlobalBest_D, LDBGlobalBest_IR, matSize);
 
 		// 截断
+		if (runningMode == 1)
+		{
+			float *p = new float;
+			float *r = new float;
+			std::cout << "default" << std::endl;
+			pt.placeRecognition();
+			generateVideo(pt.getMatchingResults());
+			std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+			std::cout << pt.calculateErr() << std::endl;
+			std::cout << "-----" << std::endl;
 
-		float *p = new float;
-		float *r = new float;
-		std::cout << "default" << std::endl;
-		pt.placeRecognition();
-		generateVideo(pt.getMatchingResults());
-		std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
-		std::cout << pt.calculateErr() << std::endl;
-		std::cout << "-----" << std::endl;
+			//std::cout << "lambda=1" << std::endl;
+			//std::vector<double> coeff3(8, 1);
+			//pt.updateParams(coeff3);
+			//pt.updateParams(0.16 * 9 / 10);
+			//pt.placeRecognition();
+			////pt.printMatchingResults();
+			//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+			//std::cout << pt.calculateErr() << std::endl;
+			//std::cout << "-----" << std::endl;
 
-		//std::cout << "lambda=1" << std::endl;
-		//std::vector<double> coeff3(8, 1);
-		//pt.updateParams(coeff3);
-		//pt.updateParams(0.16 * 9 / 10);
-		//pt.placeRecognition();
-		////pt.printMatchingResults();
-		//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
-		//std::cout << pt.calculateErr() << std::endl;
-		//std::cout << "-----" << std::endl;
+			//std::cout << "without GoogLeNet" << std::endl;
+			//std::vector<double> coeff = 
+			//{ 1.24517777,	1.685089537,
+			//	1.578978596,	1.091489515,	0.987401397,
+			//	0.526293315,	0.623399388,	0.840100646,
+			//	1.422069836 };
+			//pt.updateParams(coeff);
+			//pt.updateParams(std::vector<double>(), 8, 0);
+			//pt.updateParams(0.16 * 8.577930164	/ 10);
+			//pt.placeRecognition();
+			////pt.printMatchingResults();
+			//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+			//std::cout << pt.calculateErr() << std::endl;
+			//std::cout <<"-----" << std::endl;
+			////
+			//std::cout << "without GIST" << std::endl;
+			//pt.updateParams(coeff);
+			//pt.updateParams(std::vector<double>(), 3, 0);
+			//pt.updateParams(std::vector<double>(), 4, 0);
+			//pt.updateParams(std::vector<double>(), 2, 0);
+			//pt.updateParams(0.16 * 6.342130492	/ 10);
+			//pt.placeRecognition();
+			////pt.printMatchingResults();
+			//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+			//std::cout << pt.calculateErr() << std::endl;
+			//std::cout << "-----" << std::endl;
 
-		//std::cout << "without GoogLeNet" << std::endl;
-		//std::vector<double> coeff = 
-		//{ 1.24517777,	1.685089537,
-		//	1.578978596,	1.091489515,	0.987401397,
-		//	0.526293315,	0.623399388,	0.840100646,
-		//	1.422069836 };
-		//pt.updateParams(coeff);
-		//pt.updateParams(std::vector<double>(), 8, 0);
-		//pt.updateParams(0.16 * 8.577930164	/ 10);
-		//pt.placeRecognition();
-		////pt.printMatchingResults();
-		//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
-		//std::cout << pt.calculateErr() << std::endl;
-		//std::cout <<"-----" << std::endl;
-		////
-		//std::cout << "without GIST" << std::endl;
-		//pt.updateParams(coeff);
-		//pt.updateParams(std::vector<double>(), 3, 0);
-		//pt.updateParams(std::vector<double>(), 4, 0);
-		//pt.updateParams(std::vector<double>(), 2, 0);
-		//pt.updateParams(0.16 * 6.342130492	/ 10);
-		//pt.placeRecognition();
-		////pt.printMatchingResults();
-		//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
-		//std::cout << pt.calculateErr() << std::endl;
-		//std::cout << "-----" << std::endl;
+			//std::cout << "without LDB" << std::endl;
+			//pt.updateParams(coeff);
+			//pt.updateParams(std::vector<double>(), 6, 0);
+			//pt.updateParams(std::vector<double>(), 7, 0);
+			//pt.updateParams(std::vector<double>(), 5, 0);
+			//pt.updateParams(0.16 * 8.010206651	/ 10);
+			//pt.placeRecognition();
+			////pt.printMatchingResults();
+			//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+			//std::cout << pt.calculateErr() << std::endl;
+			//std::cout << "-----" << std::endl;
 
-		//std::cout << "without LDB" << std::endl;
-		//pt.updateParams(coeff);
-		//pt.updateParams(std::vector<double>(), 6, 0);
-		//pt.updateParams(std::vector<double>(), 7, 0);
-		//pt.updateParams(std::vector<double>(), 5, 0);
-		//pt.updateParams(0.16 * 8.010206651	/ 10);
-		//pt.placeRecognition();
-		////pt.printMatchingResults();
-		//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
-		//std::cout << pt.calculateErr() << std::endl;
-		//std::cout << "-----" << std::endl;
+			//std::cout << "without BoW" << std::endl;
+			//pt.updateParams(coeff);
+			//pt.updateParams(std::vector<double>(), 0, 0);
+			//pt.updateParams(std::vector<double>(), 1, 0);
+			//pt.updateParams(0.16 * 7.069732693	/ 10);
+			//pt.placeRecognition();
+			////pt.printMatchingResults();
+			//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+			//std::cout << pt.calculateErr() << std::endl;
+			//std::cout << "-----" << std::endl;
 
-		//std::cout << "without BoW" << std::endl;
-		//pt.updateParams(coeff);
-		//pt.updateParams(std::vector<double>(), 0, 0);
-		//pt.updateParams(std::vector<double>(), 1, 0);
-		//pt.updateParams(0.16 * 7.069732693	/ 10);
-		//pt.placeRecognition();
-		////pt.printMatchingResults();
-		//std::cout << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
-		//std::cout << pt.calculateErr() << std::endl;
-		//std::cout << "-----" << std::endl;
+			delete p;
+			delete r;
+		}
 
-		delete p;
-		delete r;
+		else if (runningMode == 3)
+		{
+			//// use OpenGA to optimize coefficents
+			std::vector<double> coeff;
+			pt.prepare4MultimodalCoefficients();
+			optimizeMultimodalCoefficients(&pt, coeff);
+			pt.updateParams(coeff);
+			////// calculate score matrix for single descriptor
+			pt.placeRecognition();
+			//pt.printMatchingResults();
+			std::cout << pt.calculateF1score() << std::endl;
+		}
+
+		else if (runningMode == 4)
+		{
+			// sweep the parameter
+			for (float i = 0.1; i <= 0.8; i += 0.05)
+			{
+				pt.updateParams(1 / i, i, 16);
+				pt.placeRecognition();
+				std::cout << i << "\t" << pt.calculateF1score() << std::endl;
+			}
+			std::cout << "\n";
+			// 应该实际的值是一半
+			for (float i = 3; i <= 79; i += 4)
+			{
+				pt.updateParams(1 / 0.4, 0.4, i);
+				pt.placeRecognition();
+				std::cout << i << "\t" << pt.calculateF1score() << std::endl;
+			}
+			std::cout << "\n";
+			pt.updateParams(1 / 0.4, 0.4, 10);
+			for (float i = 0; i <= 0.6; i += 0.02)
+			{
+				pt.updateParams(i);
+				pt.placeRecognition();
+				float *p = new float;
+				float *r = new float;
+				std::cout << i << "\t" << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
+				delete p;
+				delete r;
+			}
+		}
 	}
-
-
-#ifdef GAsearch
-	//// use OpenGA to optimize coefficents
-	std::vector<double> coeff;
-	pt.prepare4MultimodalCoefficients();
-	optimizeMultimodalCoefficients(&pt, coeff);
-	pt.updateParams(coeff);
-	////// calculate score matrix for single descriptor
-	pt.placeRecognition();
-	//pt.printMatchingResults();
-	std::cout << pt.calculateF1score() << std::endl;
-#endif // GAsearch
-
-#ifdef Sweepingsearch
-	// sweep the parameter
-	for (float i = 0.1; i <= 0.8; i += 0.05)
-	{
-		pt.updateParams(1 / i, i, 16);
-		pt.placeRecognition();
-		std::cout << i << "\t" << pt.calculateF1score() << std::endl;
-	}
-	std::cout << "\n";
-	// 应该实际的值是一半
-	for (float i = 3; i <= 79; i += 4)
-	{
-		pt.updateParams(1 / 0.4, 0.4, i);
-		pt.placeRecognition();
-		std::cout << i << "\t" << pt.calculateF1score() << std::endl;
-	}
-	std::cout << "\n";
-	pt.updateParams(1 / 0.4, 0.4, 10);
-	for (float i = 0; i <= 0.6; i += 0.02)
-	{
-		pt.updateParams(i);
-		pt.placeRecognition();
-		float *p = new float;
-		float *r = new float;
-		std::cout << i << "\t" << pt.calculateF1score(p, r) << "\t" << *p << "\t" << *r << std::endl;
-		delete p;
-		delete r;
-	}
-#endif // Sweepingsearch
-
-
 
 
 }
